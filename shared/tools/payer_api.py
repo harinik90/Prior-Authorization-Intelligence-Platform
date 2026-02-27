@@ -6,7 +6,6 @@ When PAYER_API_ENDPOINT is not set, a mock response is returned for development/
 """
 from __future__ import annotations
 
-import json
 import os
 import random
 import string
@@ -50,7 +49,7 @@ def submit_pa_to_payer(
     cpt_str = cpt_codes[0] if cpt_codes else "UNKNOWN"
     tracking_id = _generate_tracking_id(payer_id, cpt_str)
 
-    if not endpoint:
+    if not endpoint or "<" in endpoint:
         # Mock mode — return a simulated pending response
         return {
             "tracking_id": tracking_id,
@@ -123,19 +122,21 @@ def poll_pa_status(
     endpoint = os.environ.get("PAYER_API_ENDPOINT", "").strip()
     api_key = os.environ.get("PAYER_API_KEY", "").strip()
 
-    if not endpoint:
-        # Mock: simulate an approval for development
+    if not endpoint or "<" in endpoint:
+        # Mock: return pended so the Submission agent derives the final decision
+        # from the accumulated Policy Matching and Doc Completeness context,
+        # rather than blindly reporting an approval the clinical evaluation doesn't support.
         return {
             "tracking_id": tracking_id,
-            "status": "approved",
-            "decision": "APPROVED",
-            "auth_number": _generate_auth_number(),
-            "valid_from": time.strftime("%Y-%m-%d"),
-            "valid_to": "",  # 90-day validity
+            "status": "pended",
+            "decision": "PENDED — awaiting clinical review",
+            "auth_number": None,
+            "valid_from": None,
+            "valid_to": None,
             "denial_code": None,
             "denial_rationale": None,
             "mock": True,
-            "note": "PAYER_API_ENDPOINT not set — using mock approval response.",
+            "note": "PAYER_API_ENDPOINT not set — mock mode. Derive final decision from Policy Matching assessment in accumulated context.",
         }
 
     headers = {"Accept": "application/fhir+json"}

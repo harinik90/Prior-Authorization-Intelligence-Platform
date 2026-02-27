@@ -7,7 +7,7 @@ FHIR Claim resource conforming to the Prior Authorization Support (PAS) IG.
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Annotated
 
 from pydantic import Field
@@ -77,7 +77,7 @@ def build_fhir_claim(
         "patient": {
             "identifier": {"system": "urn:pa-system:patient-token", "value": patient_token}
         },
-        "created": datetime.utcnow().isoformat() + "Z",
+        "created": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "insurer": {
             "identifier": {"system": "urn:pa-system:payer-id", "value": payer_id}
         },

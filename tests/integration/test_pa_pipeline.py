@@ -67,12 +67,13 @@ async def test_lung_biopsy_full_docs_approve():
         "CPT: 32408 (CT-guided lung biopsy)\n"
         "ICD-10: R91.1 (solitary pulmonary nodule), Z87.891 (personal history of nicotine dependence)\n"
         "Payer: UHC-MA | Plan: Medicare Advantage\n"
-        "Rendering NPI: 1669449027\n"
+        "Rendering NPI: 1003268343\n"
         "Subscriber ID: UHC987654321\n"
         f"FHIR bundle: {bundle_path}\n"
         "Clinical summary: 1.2cm RUL nodule on CT chest. Fleischner Society high-risk category. "
         "Interval growth from 0.8cm on 6-month prior CT. Smoking history 30 pack-years. "
-        "Prior CT on file. Pulmonologist ordering provider. Radiologist recommends tissue sampling."
+        "Prior CT on file. Pulmonologist ordering provider NPI 1003268343 (Dr. Mohammed Abdalla, "
+        "Pulmonary Disease, IL — active). Radiologist recommends tissue sampling."
     )
 
     messages = await run_pa_pipeline(pa_input)
@@ -81,6 +82,68 @@ async def test_lung_biopsy_full_docs_approve():
 
     assert any(kw in final for kw in ("approved", "auth", "authorization number")), (
         f"Expected APPROVED decision, got: {messages[-1][:300]}"
+    )
+
+
+# ── UC3: Cardiac Catheterization — expect DENIED (negative stress test) ──────
+
+async def test_cardiac_cath_deny():
+    """UC3: Cardiac cath with negative stress test and no ACS — pipeline should DENY."""
+    _check_env()
+    from agents.pa_pipeline import run_pa_pipeline
+
+    bundle_path = str(BUNDLES_DIR / "uc3_cath_bundle.json")
+    pa_input = (
+        "Process prior authorization for patient PT-55671.\n"
+        "CPT: 93458 (left heart catheterization)\n"
+        "ICD-10: I10 (essential hypertension), R07.9 (chest pain, unspecified)\n"
+        "Payer: AETNA-COMM | Plan: PPO\n"
+        "Rendering NPI: 1417996257\n"
+        "Subscriber ID: AETNA-COMM-55671\n"
+        f"FHIR bundle: {bundle_path}\n"
+        "Clinical summary: Cardiologist requesting left heart catheterization for chest discomfort. "
+        "Exercise stress test result: NEGATIVE for inducible ischemia. Troponins negative x2. "
+        "No documented unstable angina, NSTEMI, or STEMI. "
+        "Medical management (nitrates, beta-blockers) NOT documented as trialed."
+    )
+
+    messages = await run_pa_pipeline(pa_input)
+    assert messages, "Pipeline returned no messages"
+    final = messages[-1].lower()
+
+    assert any(kw in final for kw in ("denied", "deny", "denial", "not met", "negative")), (
+        f"Expected DENIED decision for cardiac cath with negative stress test, got: {messages[-1][:300]}"
+    )
+
+
+# ── UC4: Biologic Drug / Step Therapy — expect PENDED ────────────────────────
+
+async def test_biologic_step_therapy_pend():
+    """UC4: Biologic (adalimumab) with incomplete step therapy — pipeline should PEND."""
+    _check_env()
+    from agents.pa_pipeline import run_pa_pipeline
+
+    bundle_path = str(BUNDLES_DIR / "uc4_biologic_bundle.json")
+    pa_input = (
+        "Process prior authorization for patient PT-34891.\n"
+        "CPT: J0135 (adalimumab 20mg injection)\n"
+        "ICD-10: M06.00 (rheumatoid arthritis, unspecified)\n"
+        "Payer: CIGNA-COMM | Plan: PPO\n"
+        "Rendering NPI: 1750887592\n"
+        "Subscriber ID: CIGNA-RA-10923\n"
+        f"FHIR bundle: {bundle_path}\n"
+        "Clinical summary: Rheumatoid arthritis, seropositive (RF positive). "
+        "Methotrexate trial ≥ 3 months at 15mg/week — documented inadequate response. "
+        "Second conventional DMARD trial (leflunomide or hydroxychloroquine) NOT documented. "
+        "Requesting adalimumab as first biologic without completing required step therapy."
+    )
+
+    messages = await run_pa_pipeline(pa_input)
+    assert messages, "Pipeline returned no messages"
+    final = messages[-1].lower()
+
+    assert any(kw in final for kw in ("pend", "pending", "step therapy", "dmard", "second")), (
+        f"Expected PEND due to incomplete step therapy, got: {messages[-1][:300]}"
     )
 
 
@@ -98,7 +161,7 @@ async def test_spinal_fusion_appeal_co50():
         "CPT: 22612 (posterior lumbar fusion L4-L5)\n"
         "ICD-10: M51.16 (disc degeneration lumbar), M47.816 (spondylosis with radiculopathy lumbar)\n"
         "Payer: HUMANA-MA\n"
-        "Rendering NPI: 1962498016\n"
+        "Rendering NPI: 1861701351\n"
         f"FHIR bundle: {bundle_path}\n"
         "Denial code: CO-50\n"
         "Denial rationale: Conservative treatment not exhausted — only 4 months documented, "

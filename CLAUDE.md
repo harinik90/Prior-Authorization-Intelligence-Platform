@@ -4,7 +4,7 @@
 
 AI-driven Prior Authorization (PA) automation for healthcare providers. Five specialized agents handle the end-to-end PA lifecycle: coverage check → documentation review → policy matching → FHIR claim submission → denial appeal.
 
-**Run:** `streamlit run frontend.py`
+**Run:** `streamlit run app.py`
 **Test:** `python -m pytest tests/integration/test_pa_pipeline.py -v`
 
 ---
@@ -98,9 +98,8 @@ CLAUDE_MODEL=claude-opus-4-6
 ## Key Files
 
 ```
-frontend.py                     Streamlit UI — layout, pipeline runner, MCP panel, activity log
-app.py                          Backend config — CASES, STAGES_FOR, MCP_SERVERS, prompt builders
-agents/pa_pipeline.py           WorkflowBuilder pipeline + _run_one() coroutine
+app.py                          Streamlit UI + case data + stage config + prompt builders (merged)
+agents/pa_pipeline.py           _run_one() coroutine — calls agent.run() directly
 shared/tools/foundry_client.py  build_foundry_client() — sys.modules stub + Foundry client factory
 shared/tools/anthropic_client.py build_anthropic_client() — APIM-routed AnthropicClient factory
 shared/tools/mcp_loader.py      mcp_tools() — MCP discovery + HostedMCPTool builder

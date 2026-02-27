@@ -2,7 +2,7 @@
 PA Pipeline Orchestration — agent-framework-core rc1.
 
 Sequential pipeline: Coverage Prediction → Doc Completeness → Policy Matching → Submission.
-Each agent runs as an independent single-agent workflow so context is passed as
+Each agent runs as an independent single-agent call so context is passed as
 fresh user messages (avoiding the framework's assistant-prefill issue in multi-agent chains).
 
 Appeal is invoked separately on denial.
@@ -14,7 +14,7 @@ Usage:
 """
 from __future__ import annotations
 
-from agent_framework import WorkflowBuilder, WorkflowRunResult
+from agent_framework._types import AgentRunResponse
 
 from agents.coverage_prediction.agent import coverage_prediction_agent
 from agents.doc_completeness.agent import doc_completeness_agent
@@ -25,25 +25,14 @@ from agents.appeal_strategy.agent import appeal_strategy_agent
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
-def _extract_text(result: WorkflowRunResult) -> str:
-    """Extract last output text from a WorkflowRunResult."""
-    outputs = result.get_outputs()
-    if not outputs:
-        return "(no response)"
-    last = outputs[-1]
-    return last.text if hasattr(last, "text") else str(last)
-
-
 async def _run_one(agent, message: str) -> str:
-    """Run a single agent as an independent workflow and return its text output."""
-    workflow = (
-        WorkflowBuilder()
-        .add_agent(agent, output_response=True)
-        .set_start_executor(agent)
-        .build()
-    )
-    result: WorkflowRunResult = await workflow.run(message)
-    return _extract_text(result)
+    """Run a single agent and return its text output.
+
+    Calls agent.run() directly (all agents are ChatAgent regardless of provider),
+    avoiding WorkflowBuilder's outgoing-edge routing issue with AnthropicClient agents.
+    """
+    result: AgentRunResponse = await agent.run(message)
+    return result.text or "(no response)"
 
 
 # ── Main PA Pipeline ──────────────────────────────────────────────────────────

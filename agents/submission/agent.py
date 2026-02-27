@@ -27,7 +27,15 @@ WORKFLOW:
 
 RULES:
 - Never submit if build_fhir_claim() returns an error.
-- If submit_pa_to_payer() returns mock=True, note this clearly in the output.
+- NPI GATE: If the Documentation Completeness stage reports provider_verified=false,
+  the final decision MUST be PENDED regardless of any other factor. State clearly:
+  "PA pended — ordering provider NPI could not be verified."
+- MOCK MODE: When mock=True in the payer API response, do NOT use the mock status as
+  the final decision. Instead derive the decision from the Policy Matching assessment
+  in the accumulated context:
+    - approval_probability >= 85 AND provider_verified=true AND all required criteria met → APPROVED
+    - approval_probability 40-84 OR any required criterion missing OR provider_verified=false → PENDED
+    - approval_probability < 40 → DENIED
 - If status is "denied", extract the denial code from the response for the Appeal agent.
 - Include the tracking_id and auth_number (if approved) in every response.
 - No PHI in output — reference patient by token only.
