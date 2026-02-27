@@ -250,3 +250,27 @@ All case fields (NPI, CPT, ICD-10, subscriber ID) are embedded as structured tex
 - **HIPAA:** No PHI in logs, environment variables, or prompt templates. Patient references use de-identified tokens only.
 - **Auth:** Azure CLI credential for Foundry; APIM subscription key for Claude. Both require `az login`.
 - **Data:** All clinical data stays within Azure tenant boundaries.
+
+---
+
+## Learnings
+
+1. **Start with your use cases** — Know exactly what problems you're solving before writing any code. A clear use case drives every design decision downstream.
+
+2. **Your instructions file is everything** — Time spent on `CLAUDE.md` / `instructions.md` is never wasted. Define guardrails, tech choices, and constraints upfront so your AI copilot stays on track.
+
+3. **Know your SDKs** — AI assistants drift when they don't know the SDK well. Learn the key classes and patterns yourself so you can steer the conversation.
+
+4. **Clean up as you go** — Don't wait until the end to fix things. Review and correct each layer (tools → data → agents → UI) before moving to the next.
+
+5. **Environment hygiene from day one** — Set up `.env.example` and `.gitignore` before the first line of code. Fixing this at push time is risky.
+
+6. **Context accumulation is a choice** — Passing prior agent output forward in the prompt is powerful but costly. Decide what each agent actually needs.
+
+7. **Mock integrations early** — Build mock/fallback layers for external APIs before wiring live endpoints so the pipeline is testable independently.
+
+8. **Async is an explicit contract** — Mixing sync frameworks (Streamlit) with async SDKs requires a deliberate threading strategy. Design it upfront, not as a bug fix.
+
+9. **Name things for the demo** — Stage labels and status messages are what reviewers read first. Invest in clear naming early.
+
+10. **Security scan before every first push** — Grep for names, paths, keys, and GUIDs. AI-assisted coding can surface credentials in unexpected places.
