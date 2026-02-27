@@ -1,6 +1,6 @@
 # Prior Authorization Intelligence Platform
 
-An AI-driven system that automates the end-to-end healthcare Prior Authorization (PA) workflow using a 5-agent pipeline. Built on the Microsoft Agent Framework (MAF) with GPT-4o agents hosted on Azure AI Foundry and Claude agents routed through Azure API Management.
+An AI-driven system that automates the end-to-end healthcare Prior Authorization (PA) workflow using a 5-agent pipeline. Built on the Microsoft Agent Framework (MAF) with GPT-4o agents hosted on Azure AI Foundry and Claude agents.
 
 ---
 
