@@ -41,18 +41,7 @@ Appeal Strategy Agent – Analyzes denial codes, pulls clinical literature via M
 
 ![Architecture Diagram](docs/screenshots/architecture.png)
 
-### MCP Healthcare Data Connectors
-
-| MCP Server | Used By | Purpose |
-|---|---|---|
-| `icd10_codes` | Doc, Policy, Appeal | ICD-10-CM/PCS code validation |
-| `cms_coverage` | Doc, Policy, Appeal | Medicare LCD/NCD policy criteria |
-| `npi_registry` | Doc, Appeal | Provider NPI verification (NPPES) |
-| `pubmed` | Appeal | Clinical literature for medical necessity |
-
----
-
-## Technology Stack
+### Technology Stack
 
 | Component | Technology |
 |---|---|
@@ -62,6 +51,15 @@ Appeal Strategy Agent – Analyzes denial codes, pulls clinical literature via M
 | MCP tools | `HostedMCPTool` — globally installed Claude Code plugins |
 | Frontend | Streamlit |
 | Runtime | Python 3.11+ |
+
+### MCP Healthcare Data Connectors
+
+| MCP Server | Used By | Purpose |
+|---|---|---|
+| `icd10_codes` | Doc, Policy, Appeal | ICD-10-CM/PCS code validation |
+| `cms_coverage` | Doc, Policy, Appeal | Medicare LCD/NCD policy criteria |
+| `npi_registry` | Doc, Appeal | Provider NPI verification (NPPES) |
+| `pubmed` | Appeal | Clinical literature for medical necessity |
 
 ---
 
