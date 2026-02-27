@@ -4,15 +4,15 @@ The Prior Authorization Intelligence Platform is a multi-agent AI system designe
 
 The system uses specialized AI agents, each responsible for a distinct operational step in the PA lifecycle:
 
-Coverage Prediction Agent – Estimates likelihood of approval
+Coverage Prediction Agent – Determines if PA is required for a CPT + ICD-10 + payer combination
 
-Documentation Completeness Agent – Detects missing clinical artifacts
+Documentation Completeness Agent – Detects missing clinical artifacts against payer criteria
 
-Policy Matching Agent – Aligns case details with payer policies
+Policy Matching Agent – Scores the case against payer LCD/NCD policy and predicts approval probability
 
-Submission Agent – Structures and packages the PA request
+Submission Agent – Builds a FHIR R4 Claim, submits to the payer endpoint, and polls for the decision
 
-Appeal Strategy Agent – Generates intelligent appeal narratives
+Appeal Strategy Agent – Analyzes denial codes, pulls clinical literature via MCP, drafts appeal letters, and recommends peer-to-peer review
 
 ---
 
