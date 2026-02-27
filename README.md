@@ -2,7 +2,7 @@
 
 The Prior Authorization Intelligence Platform is a multi-agent AI system designed to automate the healthcare prior authorization (PA) workflow — from coverage prediction to appeal strategy.
 
-Instead of relying on a single LLM workflow, the system uses specialized AI agents, each responsible for a distinct operational step in the PA lifecycle:
+The system uses specialized AI agents, each responsible for a distinct operational step in the PA lifecycle:
 
 Coverage Prediction Agent – Estimates likelihood of approval
 
