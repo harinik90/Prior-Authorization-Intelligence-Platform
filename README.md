@@ -8,46 +8,22 @@ Coverage Prediction Agent – Estimates likelihood of approval
 
 Documentation Completeness Agent – Detects missing clinical artifacts
 
-Policy Matching Agent – Aligns case details with payer rules
+Policy Matching Agent – Aligns case details with payer policies
 
 Submission Agent – Structures and packages the PA request
 
 Appeal Strategy Agent – Generates intelligent appeal narratives
+
 ---
 
 ## Primary Users
 
 | User | How They Use It |
 |---|---|
-| **Health Insurance Payers** | Utilization management and appeals teams automate medical necessity review, policy validation, and appeal generation to reduce manual workload and improve consistency |
 | **Healthcare Providers & RCM Teams** | Authorization specialists pre-check coverage likelihood, detect documentation gaps, and reduce denial rates before submission |
+| **Health Insurance Payers** | Utilization management and appeals teams automate medical necessity review, policy validation, and appeal generation to reduce manual workload and improve consistency |
 | **HealthTech Platforms** | SaaS and digital health companies embed it to offer AI-driven prior authorization automation as part of their workflow solutions |
 | **Enterprise AI & Innovation Teams** | Use it as a blueprint for deploying compliant, multi-agent AI systems in regulated healthcare environments |
-
----
-
-## What It Does
-
-Prior Authorization requires providers to get insurer approval before procedures. It's a high-volume, time-consuming, error-prone process. This system replaces manual PA work with a sequential AI pipeline:
-
-```
-Intake (CPT + ICD-10 + payer)
-    │
-    ▼
-Coverage Prediction ──► Is PA required?
-    │
-    ▼
-Doc Completeness ──────► Is clinical documentation complete per payer criteria?
-    │
-    ▼
-Policy Matching ────────► Does the case meet the payer's clinical policy?
-    │
-    ▼
-Submission ─────────────► Build FHIR Claim → Submit to payer → Poll decision
-    │
-    └─► (on denial)
-        Appeal Strategy ─► Analyze denial code → Draft appeal → Recommend P2P
-```
 
 ---
 
@@ -63,120 +39,63 @@ Submission ─────────────► Build FHIR Claim → Submi
 | 4 | **Submission** | GPT-4o (Azure AI Foundry) | Assembles FHIR Claim (PAS IG), submits to payer endpoint, polls for decision |
 | 5 | **Appeal Strategy** | Claude Opus 4.6 (via APIM) | Analyzes denial codes, drafts appeal letters, recommends peer-to-peer review |
 
-### Infrastructure
-
 ![Architecture Diagram](docs/screenshots/architecture.png)
 
-### MCP Servers (Healthcare Data Connectors)
+### MCP Healthcare Data Connectors
 
-Claude agents call real-time data sources via MCP during each pipeline run:
-
-| MCP Server | Provider | Used By | Purpose |
-|---|---|---|---|
-| `icd10_codes` | mcp.deepsense.ai | Doc, Policy, Appeal | ICD-10-CM/PCS code validation and lookup |
-| `cms_coverage` | mcp.deepsense.ai | Doc, Policy, Appeal | Medicare LCD/NCD policy criteria |
-| `npi_registry` | mcp.deepsense.ai | Doc, Appeal | Provider NPI verification (NPPES) |
-| `pubmed` | pubmed.mcp.claude.com | Appeal | Clinical literature for medical necessity evidence |
-
-### FHIR Data Model
-
-The Submission agent builds a FHIR R4 Claim conformant with the **PAS IG** (Prior Authorization Support Implementation Guide):
-
-| Clinical field | FHIR path | Coding system |
+| MCP Server | Used By | Purpose |
 |---|---|---|
-| Rendering NPI | `Claim.provider.identifier.value` | `http://hl7.org/fhir/sid/us-npi` |
-| CPT code(s) | `Claim.item[i].productOrService.coding[0].code` | `http://www.ama-assn.org/go/cpt` |
-| ICD-10 diagnosis | `Claim.diagnosis[i].diagnosisCodeableConcept.coding[0].code` | `http://hl7.org/fhir/sid/icd-10-cm` |
-| Subscriber ID | `Claim.insurance[0].coverage.identifier.value` | `urn:pa-system:subscriber-id` |
+| `icd10_codes` | Doc, Policy, Appeal | ICD-10-CM/PCS code validation |
+| `cms_coverage` | Doc, Policy, Appeal | Medicare LCD/NCD policy criteria |
+| `npi_registry` | Doc, Appeal | Provider NPI verification (NPPES) |
+| `pubmed` | Appeal | Clinical literature for medical necessity |
 
 ---
 
 ## Technology Stack
 
-| Component | Technology | Version |
-|---|---|---|
-| Agent orchestration | Microsoft Agent Framework (MAF) | `1.0.0b260107` |
-| GPT-4o agent client | `AzureAIAgentClient` (agent_framework_azure_ai) | hosted agents on Foundry |
-| Claude agent client | `AnthropicClient` (agent_framework.anthropic) | routed via APIM |
-| Azure identity | `AzureCliCredential` / `azure.identity.aio` | async for Foundry |
-| Frontend | Streamlit | — |
-| Runtime | Python | 3.14.2 |
-| Test framework | pytest + pytest-asyncio | session-scoped event loop |
+| Component | Technology |
+|---|---|
+| Agent orchestration | Microsoft Agent Framework (MAF) `1.0.0b260107` |
+| GPT-4o agents | `AzureAIAgentClient` — Azure AI Foundry hosted agents |
+| Claude agents | `AnthropicClient` — routed via Azure APIM |
+| MCP tools | `HostedMCPTool` — globally installed Claude Code plugins |
+| Frontend | Streamlit |
+| Runtime | Python 3.11+ |
 
 ---
 
 ## Quick Start
 
-### Prerequisites
-
-- Python 3.11+
-- Azure CLI authenticated: `az login`
-- Access to Azure AI Foundry project (for GPT-4o hosted agents)
-- Access to Azure APIM instance (for Claude routing)
-
-### Install Dependencies
-
 ```bash
+# 1. Install
 pip install -r requirements.txt
-```
 
-### Configure Environment
+# 2. Configure — copy .env.example to .env and fill in:
+#    AZURE_AI_PROJECT_ENDPOINT, AZURE_OPENAI_DEPLOYMENT
+#    APIM_ENDPOINT, APIM_SUBSCRIPTION_KEY, CLAUDE_MODEL
 
-Create a `.env` file (see `.env.example`):
+# 3. Authenticate
+az login
 
-```bash
-# Azure AI Foundry — hosted agent service endpoint
-# Format: https://<hub>.services.ai.azure.com/api/projects/<project>
-AZURE_AI_PROJECT_ENDPOINT=
-
-# GPT-4o deployment name in Foundry
-AZURE_OPENAI_DEPLOYMENT=gpt-4o
-
-# Azure APIM — Claude model gateway
-APIM_ENDPOINT=https://<apim-name>.azure-api.net/claude
-APIM_SUBSCRIPTION_KEY=
-
-# Claude model
-CLAUDE_MODEL=claude-sonnet-4-6
-```
-
-### Run
-
-```bash
+# 4. Run
 streamlit run frontend.py
-```
 
-Open http://localhost:8501 — select a case, click **Run Pipeline**.
-
-### Test
-
-```bash
+# 5. Test
 python -m pytest tests/integration/test_pa_pipeline.py -v
-# 14 tests · ~11 minutes (live Azure calls)
 ```
 
 ---
 
 ## UI Screenshots
 
-### Case Selector — Initial View
-> Select any of the 7 clinical scenarios. Form fields auto-populate with patient token, CPT, ICD-10, payer, NPI, and subscriber ID.
-
+### Case Selector
 ![Case Selector](docs/screenshots/01_case_selector.png)
 
----
-
-### UC1 — Total Knee Arthroplasty · Full 4-Stage Pipeline · PEND
-> **Payer:** BCBS-IL PPO &nbsp;|&nbsp; **CPT:** 27447 &nbsp;|&nbsp; **ICD-10:** M17.11
->
-> Pipeline runs all 4 agents sequentially. Doc Completeness flags missing BMI and KOOS/KSS score. Policy Matching scores 3/6 criteria met. Submission returns PEND status.
-> MCP servers active: ICD-10 Codes · CMS Coverage · NPI Registry
-
-**Pipeline in progress:**
+### UC1 — Total Knee Arthroplasty · BCBS-IL PPO · PEND
+> Doc Completeness flags missing BMI and KOOS/KSS score. Policy Matching scores 3/6 criteria met. Submission returns PEND.
 
 ![UC1 Pipeline Running](docs/screenshots/01_uc1_pipelinerunning.png)
-
-**Prior Auth Report — PEND decision with documentation gaps:**
 
 ![UC1 Prior Auth Report](docs/screenshots/01_uc1_priorauthreport.png)
 
@@ -194,7 +113,7 @@ python -m pytest tests/integration/test_pa_pipeline.py -v
 | UC7 | TKA Resubmission after PEND | BCBS-IL PPO | 27447 | Doc + Submission only | 🟢 APPROVE — all gaps resolved |
 | UC8 | Colonoscopy, Unknown Payer | Regional HMO | 45378 | Coverage check only | ❓ Unknown — manual verification |
 
-See [usecases.md](usecases.md) for full clinical scenarios, agent execution traces, and edge cases.
+See [usecases.md](usecases.md) for full clinical scenarios and agent execution traces.
 
 ---
 
@@ -204,73 +123,15 @@ See [usecases.md](usecases.md) for full clinical scenarios, agent execution trac
 ├── frontend.py                     Streamlit UI
 ├── app.py                          Case definitions, stage config, prompt builders
 ├── agents/
-│   ├── pa_pipeline.py              WorkflowBuilder pipeline + _run_one() coroutine
+│   ├── pa_pipeline.py              WorkflowBuilder pipeline
 │   ├── coverage_prediction/        GPT-4o Foundry hosted agent
 │   ├── doc_completeness/           Claude agent + MCP tools
 │   ├── policy_matching/            Claude agent
 │   ├── submission/                 GPT-4o Foundry hosted agent
 │   └── appeal_strategy/            Claude agent + MCP tools
-├── shared/
-│   └── tools/
-│       ├── pa_rules.py             check_pa_requirement()
-│       ├── criteria.py             check_payer_criteria(), get_fhir_documents()
-│       ├── policy.py               get_payer_policy(), score_clinical_evidence()
-│       ├── fhir_claim.py           build_fhir_claim() — FHIR R4 PAS IG
-│       ├── payer_api.py            submit_pa_to_payer(), poll_pa_status()
-│       └── mcp_loader.py           MCP server URL loader
-├── tests/
-│   └── integration/
-│       └── test_pa_pipeline.py     14 integration tests
-├── CLAUDE.md                       Claude Code instructions
-├── usecases.md                     Clinical scenarios and test cases
-├── pytest.ini                      asyncio session-scoped event loop
+├── shared/tools/                   PA rules, FHIR claim builder, payer API, MCP loader
+├── tests/integration/              14 integration tests (live Azure calls)
+├── CLAUDE.md                       AI coding instructions and guardrails
 └── .env.example                    Required environment variables
 ```
 
----
-
-## Key Implementation Details
-
-### Foundry Hosted Agents (GPT-4o)
-Coverage Prediction and Submission use `AzureAIAgentClient` — Azure AI Foundry's threads + runs model. Agents are persisted on Foundry (`should_cleanup_agent=False`) and reused across runs by looking up existing agent IDs at startup. A `sys.modules` stub prevents import errors caused by a version mismatch between `agent_framework_azure_ai` and `azure-ai-projects 2.0.0b4`.
-
-### Claude Agents via APIM
-Doc Completeness, Policy Matching, and Appeal Strategy use `AnthropicClient` routed through Azure API Management. APIM requires both `api-key` and `Ocp-Apim-Subscription-Key` headers. MCP servers are loaded as `HostedMCPTool` instances from the plugin registry.
-
-### Event Loop Management
-`AzureAIAgentClient` uses aiohttp with sessions bound to the creating event loop. A single `@st.cache_resource` event loop is shared across all Streamlit pipeline stages. In pytest, `asyncio_default_test_loop_scope = session` ensures all tests share the same loop.
-
-### Data Flow
-All case fields (NPI, CPT, ICD-10, subscriber ID) are embedded as structured text in the prompt to each agent. The Submission agent extracts them and calls `build_fhir_claim()` with structured parameters. CPT and ICD-10 are passed as `list[str]` to support multi-code cases.
-
----
-
-## Security & Compliance
-
-- **HIPAA:** No PHI in logs, environment variables, or prompt templates. Patient references use de-identified tokens only.
-- **Auth:** Azure CLI credential for Foundry; APIM subscription key for Claude. Both require `az login`.
-- **Data:** All clinical data stays within Azure tenant boundaries.
-
----
-
-## Learnings
-
-1. **Start with your use cases** — Know exactly what problems you're solving before writing any code. A clear use case drives every design decision downstream.
-
-2. **Your instructions file is everything** — Time spent on `CLAUDE.md` / `instructions.md` is never wasted. Define guardrails, tech choices, and constraints upfront so your AI copilot stays on track.
-
-3. **Know your SDKs** — AI assistants drift when they don't know the SDK well. Learn the key classes and patterns yourself so you can steer the conversation.
-
-4. **Clean up as you go** — Don't wait until the end to fix things. Review and correct each layer (tools → data → agents → UI) before moving to the next.
-
-5. **Environment hygiene from day one** — Set up `.env.example` and `.gitignore` before the first line of code. Fixing this at push time is risky.
-
-6. **Context accumulation is a choice** — Passing prior agent output forward in the prompt is powerful but costly. Decide what each agent actually needs.
-
-7. **Mock integrations early** — Build mock/fallback layers for external APIs before wiring live endpoints so the pipeline is testable independently.
-
-8. **Async is an explicit contract** — Mixing sync frameworks (Streamlit) with async SDKs requires a deliberate threading strategy. Design it upfront, not as a bug fix.
-
-9. **Name things for the demo** — Stage labels and status messages are what reviewers read first. Invest in clear naming early.
-
-10. **Security scan before every first push** — Grep for names, paths, keys, and GUIDs. AI-assisted coding can surface credentials in unexpected places.
