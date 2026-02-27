@@ -2,6 +2,8 @@
 
 Seven use cases covering four distinct workflow patterns. Each documents the clinical scenario, agents invoked, expected output, and edge cases.
 
+See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, LCD, KOOS, CO-50, etc.) and technical terms (FHIR, MCP, APIM, MAF) used throughout.
+
 | UC | Workflow Pattern | Agents Invoked |
 |---|---|---|
 | UC1 | Full 4-stage pipeline | Coverage → Doc → Policy → Submission |

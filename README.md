@@ -113,7 +113,7 @@ python -m pytest tests/integration/test_pa_pipeline.py -v
 | UC7 | TKA Resubmission after PEND | BCBS-IL PPO | 27447 | Doc + Submission only | 🟢 APPROVE — all gaps resolved |
 | UC8 | Colonoscopy, Unknown Payer | Regional HMO | 45378 | Coverage check only | ❓ Unknown — manual verification |
 
-See [usecases.md](usecases.md) for full clinical scenarios and agent execution traces.
+See [usecases.md](usecases.md) for full clinical scenarios and agent execution traces. See [glossary.md](glossary.md) for definitions of clinical, FHIR, and AI terms used throughout.
 
 ---
 
