@@ -1,6 +1,28 @@
 # Prior Authorization Intelligence Platform
 
-An AI-driven system that automates the end-to-end healthcare Prior Authorization (PA) workflow using a 5-agent pipeline. Built on the Microsoft Agent Framework (MAF) with GPT-4o agents hosted on Azure AI Foundry and Claude agents.
+The Prior Authorization Intelligence Platform is a multi-agent AI system designed to automate the healthcare prior authorization (PA) workflow — from coverage prediction to appeal strategy.
+
+Instead of relying on a single LLM workflow, the system uses specialized AI agents, each responsible for a distinct operational step in the PA lifecycle:
+
+Coverage Prediction Agent – Estimates likelihood of approval
+
+Documentation Completeness Agent – Detects missing clinical artifacts
+
+Policy Matching Agent – Aligns case details with payer rules
+
+Submission Agent – Structures and packages the PA request
+
+Appeal Strategy Agent – Generates intelligent appeal narratives
+---
+
+## Primary Users
+
+| User | How They Use It |
+|---|---|
+| **Health Insurance Payers** | Utilization management and appeals teams automate medical necessity review, policy validation, and appeal generation to reduce manual workload and improve consistency |
+| **Healthcare Providers & RCM Teams** | Authorization specialists pre-check coverage likelihood, detect documentation gaps, and reduce denial rates before submission |
+| **HealthTech Platforms** | SaaS and digital health companies embed it to offer AI-driven prior authorization automation as part of their workflow solutions |
+| **Enterprise AI & Innovation Teams** | Use it as a blueprint for deploying compliant, multi-agent AI systems in regulated healthcare environments |
 
 ---
 
