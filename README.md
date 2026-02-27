@@ -36,10 +36,10 @@ Submission ─────────────► Build FHIR Claim → Submi
 | # | Agent | Model | Responsibility |
 |---|---|---|---|
 | 1 | **Coverage Prediction** | GPT-4o (Azure AI Foundry) | Determines if PA is required for a CPT + ICD-10 + payer combination |
-| 2 | **Doc Completeness** | Claude 3.7 (via APIM) | Reviews clinical notes against payer criteria; flags missing documentation |
-| 3 | **Policy Matching** | Claude 3.7 (via APIM) | Scores the case against payer LCD/NCD policy; predicts approval probability |
+| 2 | **Doc Completeness** | Claude Opus 4.6 (via APIM) | Reviews clinical notes against payer criteria; flags missing documentation |
+| 3 | **Policy Matching** | Claude Opus 4.6 (via APIM) | Scores the case against payer LCD/NCD policy; predicts approval probability |
 | 4 | **Submission** | GPT-4o (Azure AI Foundry) | Assembles FHIR Claim (PAS IG), submits to payer endpoint, polls for decision |
-| 5 | **Appeal Strategy** | Claude 3.7 (via APIM) | Analyzes denial codes, drafts appeal letters, recommends peer-to-peer review |
+| 5 | **Appeal Strategy** | Claude Opus 4.6 (via APIM) | Analyzes denial codes, drafts appeal letters, recommends peer-to-peer review |
 
 ### Infrastructure
 
