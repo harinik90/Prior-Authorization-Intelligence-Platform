@@ -1,0 +1,94 @@
+{
+  "_comment": "PA requirement rules per payer + CPT. pa_required: true/false/unknown. plan_types lists which plan types require PA for this CPT.",
+  "BCBS-IL": {
+    "27447": {
+      "pa_required": true,
+      "plan_types": ["PPO", "HMO", "EPO"],
+      "turnaround_days": 2,
+      "rationale": "BCBS-IL requires PA for all elective total knee arthroplasty (TKA) procedures",
+      "emergency_exempt": false,
+      "step_therapy_required": false
+    },
+    "93458": {
+      "pa_required": true,
+      "plan_types": ["PPO", "HMO"],
+      "turnaround_days": 1,
+      "rationale": "Advanced cardiac diagnostic procedures require PA",
+      "emergency_exempt": true
+    },
+    "99213": { "pa_required": false },
+    "99285": { "pa_required": false, "rationale": "Emergency services are PA-exempt" }
+  },
+  "UHC-MA": {
+    "32408": {
+      "pa_required": true,
+      "plan_types": ["Medicare Advantage"],
+      "turnaround_days": 3,
+      "rationale": "Invasive diagnostic procedures require PA under Medicare Advantage",
+      "emergency_exempt": false
+    },
+    "70553": {
+      "pa_required": true,
+      "plan_types": ["Medicare Advantage", "HMO"],
+      "turnaround_days": 2,
+      "rationale": "Advanced imaging (MRI with contrast) requires PA",
+      "emergency_exempt": true
+    },
+    "99285": { "pa_required": false, "rationale": "Emergency services are PA-exempt" }
+  },
+  "AETNA-COMM": {
+    "93458": {
+      "pa_required": true,
+      "plan_types": ["HMO", "PPO"],
+      "turnaround_days": 1,
+      "rationale": "Aetna requires PA for cardiac catheterization on all plan types",
+      "emergency_exempt": true,
+      "expedited_available": true
+    },
+    "70553": {
+      "pa_required": true,
+      "plan_types": ["HMO", "PPO", "EPO"],
+      "turnaround_days": 2,
+      "rationale": "Advanced imaging requires PA",
+      "emergency_exempt": true
+    },
+    "99285": { "pa_required": false, "rationale": "Emergency services are PA-exempt" },
+    "99213": { "pa_required": false }
+  },
+  "CIGNA-COMM": {
+    "J0135": {
+      "pa_required": true,
+      "plan_types": ["PPO", "HMO"],
+      "turnaround_days": 5,
+      "rationale": "Specialty biologics require PA and step therapy validation",
+      "step_therapy_required": true,
+      "dmard_failures_required": 2,
+      "biosimilar_preferred": true,
+      "emergency_exempt": false
+    },
+    "22612": {
+      "pa_required": true,
+      "plan_types": ["PPO", "HMO"],
+      "turnaround_days": 3,
+      "rationale": "Spinal fusion surgery requires PA and conservative treatment documentation",
+      "conservative_tx_months_required": 6,
+      "emergency_exempt": false
+    }
+  },
+  "HUMANA-MA": {
+    "22612": {
+      "pa_required": true,
+      "plan_types": ["Medicare Advantage"],
+      "turnaround_days": 3,
+      "rationale": "Spinal fusion requires PA; 6 months conservative treatment documentation required",
+      "conservative_tx_months_required": 6,
+      "emergency_exempt": false
+    },
+    "32408": {
+      "pa_required": true,
+      "plan_types": ["Medicare Advantage"],
+      "turnaround_days": 3,
+      "emergency_exempt": false
+    }
+  }
+}

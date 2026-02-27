@@ -1,0 +1,121 @@
+{
+  "_comment": "Documentation checklists per payer + CPT. required_docs is the checklist the Doc Completeness agent validates against.",
+  "BCBS-IL": {
+    "27447": {
+      "policy_reference": "BCBS-IL Medical Policy MP-7.01.87",
+      "required_docs": [
+        "Conservative treatment: physical therapy documented for minimum 3 months",
+        "NSAIDs or intra-articular injections trialed and documented",
+        "Weight-bearing X-ray showing joint space narrowing (Kellgren-Lawrence grade 3 or 4)",
+        "BMI documented and must be below 40 kg/m2",
+        "Functional impairment scoring (KOOS or KSS questionnaire completed)",
+        "Orthopedic surgeon ordering provider NPI verified as active"
+      ],
+      "optional_docs": [
+        "MRI if X-ray inconclusive",
+        "Physical therapy discharge summary"
+      ],
+      "step_therapy": null
+    },
+    "93458": {
+      "policy_reference": "BCBS-IL Medical Policy MP-7.01.44",
+      "required_docs": [
+        "Cardiology specialist ordering (taxonomy code verification required)",
+        "Non-invasive cardiac stress test result (positive within 90 days)",
+        "ECG report within 30 days",
+        "Clinical documentation of acute coronary syndrome or unstable angina",
+        "Medications trialed (nitrates, beta-blockers) documented"
+      ],
+      "optional_docs": ["Echocardiogram if valvular disease suspected"],
+      "step_therapy": null
+    }
+  },
+  "UHC-MA": {
+    "32408": {
+      "policy_reference": "UnitedHealthcare Medicare Advantage LCD L38672",
+      "required_docs": [
+        "CT chest report documenting nodule size, location, and Fleischner Society category",
+        "Smoking history and risk factor documentation (pack-years, cessation status)",
+        "Prior surveillance CT demonstrating interval growth (if nodule >= 6mm, high-risk patient)",
+        "Pulmonology or thoracic surgery specialist ordering (NPI specialty verified)",
+        "Clinical indication: radiologist report recommending tissue sampling"
+      ],
+      "optional_docs": ["PET-CT for nodules > 8mm", "Pulmonary function tests"],
+      "step_therapy": null
+    },
+    "70553": {
+      "policy_reference": "UHC Coverage Determination Guideline - Advanced Imaging",
+      "required_docs": [
+        "Neurologist or neurology-trained ordering provider NPI verified",
+        "Clinical indication documented (e.g., MS monitoring, headache with red flags)",
+        "Prior imaging results if this is a follow-up study"
+      ],
+      "optional_docs": [],
+      "step_therapy": null
+    }
+  },
+  "AETNA-COMM": {
+    "93458": {
+      "policy_reference": "Aetna Clinical Policy Bulletin 0021",
+      "required_docs": [
+        "Cardiology specialist ordering (NPI taxonomy: Cardiovascular Disease 207RC0000X)",
+        "Positive non-invasive cardiac stress test within 90 days",
+        "ECG report",
+        "Documentation of unstable angina, NSTEMI, or STEMI symptoms",
+        "Failed or inadequate medical management documented (nitrates, beta-blockers)"
+      ],
+      "optional_docs": ["Echocardiogram", "Prior catheterization results"],
+      "step_therapy": null
+    }
+  },
+  "CIGNA-COMM": {
+    "J0135": {
+      "policy_reference": "Cigna Coverage Policy 0522 - Biologic DMARDs for RA",
+      "required_docs": [
+        "Rheumatoid arthritis diagnosis confirmed (RF or anti-CCP antibody positive)",
+        "DAS28 or CDAI disease activity score documented (moderate-severe: DAS28 > 3.2)",
+        "Methotrexate trial: minimum 3 months at dose >= 15mg/week, documented inadequate response or intolerance",
+        "Second DMARD trial: leflunomide or hydroxychloroquine failure documented",
+        "Rheumatologist ordering provider NPI verified (taxonomy: Rheumatology 207RR0500X)",
+        "No active infection or TB (TB screening within 12 months)"
+      ],
+      "optional_docs": [
+        "Biosimilar trial documentation if brand-name Humira requested",
+        "Hepatic function panel (methotrexate contraindication check)"
+      ],
+      "step_therapy": {
+        "required": true,
+        "steps": ["methotrexate", "second_DMARD"],
+        "exception_criteria": ["methotrexate_contraindication", "rapid_progression"]
+      }
+    },
+    "22612": {
+      "policy_reference": "Cigna Coverage Policy 0140 - Lumbar Spine Surgery",
+      "required_docs": [
+        "Conservative treatment: minimum 6 months physical therapy or chiropractic care documented",
+        "Epidural steroid injections: at least 2 rounds attempted and failed",
+        "MRI lumbar spine showing structural pathology (disc herniation, stenosis, spondylolisthesis)",
+        "Neurological deficit or severe radiculopathy documented",
+        "Orthopedic or neurosurgeon ordering NPI verified",
+        "Functional disability score (ODI or VAS pain score) documented"
+      ],
+      "optional_docs": ["EMG/nerve conduction study", "CT myelogram if MRI contraindicated"],
+      "step_therapy": null
+    }
+  },
+  "HUMANA-MA": {
+    "22612": {
+      "policy_reference": "Humana Medicare Advantage LCD L36521",
+      "required_docs": [
+        "Conservative treatment: minimum 6 months documented (PT, chiro, pain management)",
+        "Epidural steroid injections attempted (minimum 2, documented failure)",
+        "MRI or CT myelogram showing foraminal stenosis or disc pathology at operative level",
+        "Neurological deficit documented (radiculopathy, myelopathy, or motor deficit)",
+        "Surgeon NPI verified (Orthopedic Surgery or Neurological Surgery taxonomy)",
+        "Functional disability assessment (ODI score >= 40 or equivalent)"
+      ],
+      "optional_docs": ["EMG confirming nerve root compression", "Pain management specialist consultation"],
+      "step_therapy": null
+    }
+  }
+}

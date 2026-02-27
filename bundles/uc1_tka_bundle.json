@@ -1,0 +1,114 @@
+{
+  "resourceType": "Bundle",
+  "id": "uc1-tka-pa-bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PT-78432",
+        "identifier": [{ "system": "urn:pa-system:patient-token", "value": "PT-78432" }],
+        "gender": "male",
+        "birthDate": "1960-03-14",
+        "address": [{ "state": "IL" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-bcbs-78432",
+        "status": "active",
+        "subscriber": { "reference": "Patient/PT-78432" },
+        "beneficiary": { "reference": "Patient/PT-78432" },
+        "payor": [{ "display": "BCBS-IL", "identifier": { "value": "BCBS-IL" } }],
+        "class": [
+          { "type": { "coding": [{ "code": "plan" }] }, "value": "PPO", "name": "BlueCross BlueShield PPO" },
+          { "type": { "coding": [{ "code": "group" }] }, "value": "GRP-44512" }
+        ],
+        "subscriberId": "BCB123456789"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "sr-tka-78432",
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "27447",
+              "display": "Arthroplasty, knee, condyle and plateau; medial AND lateral compartments with or without patella resurfacing (total knee arthroplasty)"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-78432" },
+        "requester": { "reference": "Practitioner/NPI-1003000126" },
+        "insurance": [{ "reference": "Coverage/cov-bcbs-78432" }],
+        "reasonReference": [{ "reference": "Condition/cond-oa-right-knee" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-oa-right-knee",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "M17.11",
+              "display": "Primary osteoarthritis, right knee"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-78432" },
+        "onsetDateTime": "2021-06-01",
+        "note": [{ "text": "Patient reports severe right knee pain, KL grade 3 on weight-bearing X-ray. Conservative treatment with PT x12 weeks and NSAIDs completed. Functional impairment significant — unable to ambulate more than 2 blocks." }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "NPI-1003000126",
+        "identifier": [
+          { "system": "http://hl7.org/fhir/sid/us-npi", "value": "1003000126" }
+        ],
+        "name": [{ "family": "Smith", "given": ["James"], "prefix": ["Dr."] }],
+        "qualification": [
+          {
+            "code": {
+              "coding": [{ "system": "http://nucc.org/provider-taxonomy", "code": "207X00000X", "display": "Orthopaedic Surgery" }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "doc-pt-notes-78432",
+        "status": "current",
+        "type": { "coding": [{ "code": "11506-3", "system": "http://loinc.org", "display": "Progress note" }] },
+        "subject": { "reference": "Patient/PT-78432" },
+        "date": "2024-09-15",
+        "description": "Physical therapy progress notes — 12 weeks completed",
+        "content": [{ "attachment": { "contentType": "text/plain", "title": "PT Progress Notes Q3 2024" } }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-xray-knee",
+        "status": "final",
+        "code": { "coding": [{ "code": "36643-5", "system": "http://loinc.org", "display": "XR Knee AP and Lateral" }] },
+        "subject": { "reference": "Patient/PT-78432" },
+        "effectiveDateTime": "2024-10-01",
+        "valueString": "Weight-bearing AP: medial joint space 2mm, lateral 4mm. Kellgren-Lawrence Grade 3. Osteophyte formation present. Subchondral sclerosis noted.",
+        "note": [{ "text": "KL Grade 3 — significant medial compartment narrowing consistent with advanced OA" }]
+      }
+    }
+  ]
+}

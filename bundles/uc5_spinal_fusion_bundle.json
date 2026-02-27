@@ -1,0 +1,148 @@
+{
+  "resourceType": "Bundle",
+  "id": "uc5-spinal-fusion-appeal-bundle",
+  "type": "collection",
+  "_comment": "This bundle represents a DENIAL scenario — includes original Claim and ClaimResponse (denial) for the Appeal Strategy agent",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PT-90234",
+        "identifier": [{ "system": "urn:pa-system:patient-token", "value": "PT-90234" }],
+        "gender": "male",
+        "birthDate": "1958-04-19",
+        "address": [{ "state": "KY" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-humana-90234",
+        "status": "active",
+        "subscriber": { "reference": "Patient/PT-90234" },
+        "beneficiary": { "reference": "Patient/PT-90234" },
+        "payor": [{ "display": "HUMANA-MA", "identifier": { "value": "HUMANA-MA" } }],
+        "class": [
+          { "type": { "coding": [{ "code": "plan" }] }, "value": "Medicare Advantage" }
+        ],
+        "subscriberId": "HUM789012345"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Claim",
+        "id": "claim-spinal-90234",
+        "status": "active",
+        "type": { "coding": [{ "code": "professional" }] },
+        "use": "preauthorization",
+        "patient": { "reference": "Patient/PT-90234" },
+        "insurance": [{ "sequence": 1, "focal": true, "coverage": { "reference": "Coverage/cov-humana-90234" } }],
+        "item": [
+          {
+            "sequence": 1,
+            "productOrService": {
+              "coding": [
+                {
+                  "system": "http://www.ama-assn.org/go/cpt",
+                  "code": "22612",
+                  "display": "Arthrodesis, posterior or posterolateral technique, single level; lumbar (with lateral transverse technique, when performed)"
+                }
+              ]
+            },
+            "diagnosisLinkId": [1, 2]
+          }
+        ],
+        "diagnosis": [
+          {
+            "sequence": 1,
+            "diagnosisCodeableConcept": {
+              "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "M51.16", "display": "Intervertebral disc degeneration, lumbar region" }]
+            }
+          },
+          {
+            "sequence": 2,
+            "diagnosisCodeableConcept": {
+              "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "M47.816", "display": "Spondylosis with radiculopathy, lumbar region" }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ClaimResponse",
+        "id": "claimresp-denial-90234",
+        "status": "active",
+        "type": { "coding": [{ "code": "professional" }] },
+        "use": "preauthorization",
+        "patient": { "reference": "Patient/PT-90234" },
+        "request": { "reference": "Claim/claim-spinal-90234" },
+        "outcome": "denied",
+        "disposition": "Denied — Medical Necessity Not Established",
+        "processNote": [
+          {
+            "number": 1,
+            "type": "display",
+            "text": "Denial Code: CO-50. The requested procedure (CPT 22612, posterior lumbar fusion L4-L5) was denied as not medically necessary per Humana Medicare Advantage LCD L36521. Conservative treatment not documented for the required minimum of 6 months. Records show 4 months of physical therapy. Please submit additional documentation of conservative treatment or appeal within 60 days."
+          }
+        ],
+        "item": [
+          {
+            "itemSequence": 1,
+            "adjudication": [
+              {
+                "category": { "coding": [{ "code": "benefit" }] },
+                "reason": { "coding": [{ "code": "CO-50", "display": "Not medically necessary" }] },
+                "amount": { "value": 0, "currency": "USD" }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-disc-degen",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
+        "code": {
+          "coding": [
+            { "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "M51.16", "display": "Intervertebral disc degeneration, lumbar region" }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-90234" },
+        "note": [{ "text": "MRI L-spine: severe L4-L5 disc degeneration with foraminal stenosis. Neurological deficit: right L5 radiculopathy confirmed on EMG. Failed PT x4 months, 2 epidural steroid injections (inadequate relief). Functional ODI score 62/100." }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "NPI-1962498016",
+        "identifier": [{ "system": "http://hl7.org/fhir/sid/us-npi", "value": "1962498016" }],
+        "name": [{ "family": "Johnson", "given": ["Robert"], "prefix": ["Dr."] }],
+        "qualification": [
+          {
+            "code": {
+              "coding": [{ "system": "http://nucc.org/provider-taxonomy", "code": "207X00000X", "display": "Orthopaedic Surgery" }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Communication",
+        "id": "denial-letter-90234",
+        "status": "completed",
+        "subject": { "reference": "Patient/PT-90234" },
+        "sent": "2024-11-01",
+        "payload": [
+          {
+            "contentString": "PA Request ID: HUMANA-2024-SPINE-77102. Service: CPT 22612 (posterior lumbar fusion L4-L5). Decision: DENIED. Reason: CO-50 — Conservative treatment not exhausted (4 months documented, 6 months required per LCD L36521). Appeal deadline: 2024-12-31."
+          }
+        ]
+      }
+    }
+  ]
+}

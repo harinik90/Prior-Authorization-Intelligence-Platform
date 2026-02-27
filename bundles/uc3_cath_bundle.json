@@ -1,0 +1,121 @@
+{
+  "resourceType": "Bundle",
+  "id": "uc3-cardiac-cath-pa-bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PT-55671",
+        "identifier": [{ "system": "urn:pa-system:patient-token", "value": "PT-55671" }],
+        "gender": "male",
+        "birthDate": "1966-11-03",
+        "address": [{ "state": "IL" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-aetna-55671",
+        "status": "active",
+        "subscriber": { "reference": "Patient/PT-55671" },
+        "beneficiary": { "reference": "Patient/PT-55671" },
+        "payor": [{ "display": "AETNA-COMM", "identifier": { "value": "AETNA-COMM" } }],
+        "class": [
+          { "type": { "coding": [{ "code": "plan" }] }, "value": "HMO", "name": "Aetna HMO" }
+        ],
+        "subscriberId": "AET456789012"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "sr-cath-55671",
+        "status": "active",
+        "intent": "order",
+        "priority": "urgent",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "93458",
+              "display": "Catheterization, left heart, retrograde, from the brachial artery, axillary artery or femoral artery"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-55671" },
+        "requester": { "reference": "Practitioner/NPI-1588643550" },
+        "insurance": [{ "reference": "Coverage/cov-aetna-55671" }],
+        "reasonReference": [
+          { "reference": "Condition/cond-unstable-angina" },
+          { "reference": "Condition/cond-bradycardia" }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-unstable-angina",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I20.0",
+              "display": "Unstable angina"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-55671" },
+        "onsetDateTime": "2024-10-20",
+        "note": [{ "text": "Patient presents with unstable angina, positive stress test (Bruce protocol, 4 METs, ST depression at low workload). Nitrates and beta-blockers initiated. Cardiology referral for catheterization." }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-bradycardia",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "R00.1",
+              "display": "Bradycardia, unspecified"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-55671" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "NPI-1588643550",
+        "identifier": [{ "system": "http://hl7.org/fhir/sid/us-npi", "value": "1588643550" }],
+        "name": [{ "family": "Rodriguez", "given": ["Maria"], "prefix": ["Dr."] }],
+        "qualification": [
+          {
+            "code": {
+              "coding": [{ "system": "http://nucc.org/provider-taxonomy", "code": "207RC0000X", "display": "Cardiovascular Disease" }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "doc-stress-test",
+        "status": "current",
+        "type": { "coding": [{ "code": "18752-6", "system": "http://loinc.org", "display": "Exercise stress test study" }] },
+        "subject": { "reference": "Patient/PT-55671" },
+        "date": "2024-10-18",
+        "description": "Positive treadmill stress test — ST depression at 4 METs",
+        "content": [{ "attachment": { "contentType": "text/plain", "title": "Exercise Stress Test Report 10/18/2024" } }]
+      }
+    }
+  ]
+}

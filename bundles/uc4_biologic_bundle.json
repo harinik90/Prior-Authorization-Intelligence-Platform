@@ -1,0 +1,120 @@
+{
+  "resourceType": "Bundle",
+  "id": "uc4-biologic-pa-bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PT-34891",
+        "identifier": [{ "system": "urn:pa-system:patient-token", "value": "PT-34891" }],
+        "gender": "female",
+        "birthDate": "1975-02-28",
+        "address": [{ "state": "IL" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-cigna-34891",
+        "status": "active",
+        "subscriber": { "reference": "Patient/PT-34891" },
+        "beneficiary": { "reference": "Patient/PT-34891" },
+        "payor": [{ "display": "CIGNA-COMM", "identifier": { "value": "CIGNA-COMM" } }],
+        "class": [
+          { "type": { "coding": [{ "code": "plan" }] }, "value": "PPO", "name": "Cigna PPO" }
+        ],
+        "subscriberId": "CIG123987456"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "sr-biologic-34891",
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+              "code": "J0135",
+              "display": "Injection, adalimumab, 20 mg"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-34891" },
+        "requester": { "reference": "Practitioner/NPI-1275542444" },
+        "insurance": [{ "reference": "Coverage/cov-cigna-34891" }],
+        "reasonReference": [{ "reference": "Condition/cond-ra" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-ra",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "M06.00",
+              "display": "Rheumatoid arthritis of unspecified site without rheumatoid factor"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-34891" },
+        "onsetDateTime": "2020-01-15",
+        "note": [{ "text": "Seropositive RA (anti-CCP positive 180 U/mL). DAS28 score 5.8 (high disease activity). Failed methotrexate 20mg/week x 4 months (inadequate response, GI intolerance). Methotrexate trial documented. Leflunomide trial pending — only one DMARD failure documented to date." }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medrx-adalimumab",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "327361",
+              "display": "adalimumab 40 MG/0.8ML Injectable Solution [Humira]"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-34891" },
+        "requester": { "reference": "Practitioner/NPI-1275542444" },
+        "reasonReference": [{ "reference": "Condition/cond-ra" }],
+        "note": [{ "text": "Biologic DMARD initiation. Step therapy: methotrexate failure documented. Second DMARD (leflunomide) trial not yet completed." }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "NPI-1275542444",
+        "identifier": [{ "system": "http://hl7.org/fhir/sid/us-npi", "value": "1275542444" }],
+        "name": [{ "family": "Patel", "given": ["Anjali"], "prefix": ["Dr."] }],
+        "qualification": [
+          {
+            "code": {
+              "coding": [{ "system": "http://nucc.org/provider-taxonomy", "code": "207RR0500X", "display": "Rheumatology" }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-das28",
+        "status": "final",
+        "code": { "coding": [{ "code": "DAS28", "system": "urn:rheumatology:scores", "display": "DAS28 Disease Activity Score" }] },
+        "subject": { "reference": "Patient/PT-34891" },
+        "effectiveDateTime": "2024-10-10",
+        "valueQuantity": { "value": 5.8, "unit": "score" },
+        "note": [{ "text": "High disease activity. Anti-CCP 180 U/mL, RF 64 IU/mL." }]
+      }
+    }
+  ]
+}

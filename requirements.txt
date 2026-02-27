@@ -1,0 +1,27 @@
+# ── Microsoft Agent Framework (MAF) ─────────────────────────────────────────
+# Install from private feed / local wheel if not on PyPI
+agent-framework-core>=1.0.0b260107      # agent_framework: WorkflowBuilder, ChatAgent, WorkflowRunResult
+agent-framework-anthropic>=1.0.0b260107 # agent_framework.anthropic: AnthropicClient
+agent-framework-azure-ai>=1.0.0b260107  # agent_framework_azure_ai: AzureAIAgentClient (Foundry hosted agents)
+
+# ── Azure SDKs ────────────────────────────────────────────────────────────────
+azure-identity>=1.15.0                  # AzureCliCredential (sync + async via azure.identity.aio)
+azure-ai-agents>=1.0.0b5                # azure.ai.agents.AgentsClient — Azure AI Foundry Agent Service
+
+# ── Anthropic SDK ─────────────────────────────────────────────────────────────
+anthropic>=0.50.0                       # AsyncAnthropic — used by AnthropicClient (APIM routing via base_url)
+
+# ── MCP ───────────────────────────────────────────────────────────────────────
+mcp>=1.0.0                              # MCP protocol client (required by HostedMCPTool / MCPStreamableHTTPTool)
+
+# ── Frontend ──────────────────────────────────────────────────────────────────
+streamlit>=1.35.0                       # Streamlit UI (frontend.py)
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0                    # .env loading (conftest.py, app.py)
+requests>=2.31.0                        # MCP server availability probing (mcp_loader.py, payer_api.py)
+pydantic>=2.0.0                         # Tool function parameter annotations (shared/tools/*.py)
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest>=8.0.0
+pytest-asyncio>=0.23.0                  # asyncio_mode=auto, session-scoped event loop (pytest.ini)

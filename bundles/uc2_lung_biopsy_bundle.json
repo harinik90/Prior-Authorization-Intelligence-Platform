@@ -1,0 +1,147 @@
+{
+  "resourceType": "Bundle",
+  "id": "uc2-lung-biopsy-pa-bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PT-11209",
+        "identifier": [{ "system": "urn:pa-system:patient-token", "value": "PT-11209" }],
+        "gender": "male",
+        "birthDate": "1958-07-22",
+        "address": [{ "state": "IL" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-uhcma-11209",
+        "status": "active",
+        "subscriber": { "reference": "Patient/PT-11209" },
+        "beneficiary": { "reference": "Patient/PT-11209" },
+        "payor": [{ "display": "UHC-MA-IL", "identifier": { "value": "UHC-MA" } }],
+        "class": [
+          { "type": { "coding": [{ "code": "plan" }] }, "value": "Medicare Advantage", "name": "UnitedHealthcare Medicare Advantage" }
+        ],
+        "subscriberId": "UHC987654321"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "sr-biopsy-11209",
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "32408",
+              "display": "Core needle biopsy, lung or mediastinum, percutaneous, including imaging guidance, when performed"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-11209" },
+        "requester": { "reference": "Practitioner/NPI-1669449027" },
+        "insurance": [{ "reference": "Coverage/cov-uhcma-11209" }],
+        "reasonReference": [
+          { "reference": "Condition/cond-lung-nodule" },
+          { "reference": "Condition/cond-tobacco-hx" }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-lung-nodule",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "R91.1",
+              "display": "Solitary pulmonary nodule"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-11209" },
+        "onsetDateTime": "2024-08-10",
+        "note": [{ "text": "1.2cm right upper lobe nodule identified on surveillance CT. Fleischner Society high-risk category. Interval growth from 0.8cm on 6-month prior CT. Biopsy recommended by radiologist." }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-tobacco-hx",
+        "clinicalStatus": { "coding": [{ "code": "inactive" }] },
+        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "Z87.891",
+              "display": "Personal history of nicotine dependence"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-11209" },
+        "note": [{ "text": "30 pack-year smoking history. Cessation 5 years ago." }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "NPI-1669449027",
+        "identifier": [
+          { "system": "http://hl7.org/fhir/sid/us-npi", "value": "1669449027" }
+        ],
+        "name": [{ "family": "Chen", "given": ["Wei"], "prefix": ["Dr."] }],
+        "qualification": [
+          {
+            "code": {
+              "coding": [{ "system": "http://nucc.org/provider-taxonomy", "code": "2084P0301X", "display": "Pulmonary Disease" }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "doc-ct-chest-current",
+        "status": "current",
+        "type": { "coding": [{ "code": "24629-3", "system": "http://loinc.org", "display": "CT Chest with contrast" }] },
+        "subject": { "reference": "Patient/PT-11209" },
+        "date": "2024-10-15",
+        "description": "CT Chest with contrast — current study",
+        "content": [{ "attachment": { "contentType": "text/plain", "title": "CT Chest Report 10/15/2024" } }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "doc-ct-chest-prior",
+        "status": "current",
+        "type": { "coding": [{ "code": "24629-3", "system": "http://loinc.org", "display": "CT Chest prior study" }] },
+        "subject": { "reference": "Patient/PT-11209" },
+        "date": "2024-04-10",
+        "description": "CT Chest — prior surveillance study showing 0.8cm RUL nodule",
+        "content": [{ "attachment": { "contentType": "text/plain", "title": "CT Chest Report 04/10/2024 (prior)" } }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-nodule-size",
+        "status": "final",
+        "code": { "coding": [{ "code": "246116008", "system": "http://snomed.info/sct", "display": "Pulmonary nodule size" }] },
+        "subject": { "reference": "Patient/PT-11209" },
+        "effectiveDateTime": "2024-10-15",
+        "valueQuantity": { "value": 1.2, "unit": "cm", "system": "http://unitsofmeasure.org", "code": "cm" },
+        "note": [{ "text": "Fleischner Society high-risk category. Interval growth from 0.8cm (Apr 2024) to 1.2cm (Oct 2024). Tissue sampling recommended." }]
+      }
+    }
+  ]
+}

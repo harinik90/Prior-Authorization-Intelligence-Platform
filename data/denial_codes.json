@@ -1,0 +1,117 @@
+{
+  "_comment": "Standard CARC (Claim Adjustment Reason Code) denial codes with appeal pathways. CO=Contractual Obligation, PR=Patient Responsibility, OA=Other Adjustment.",
+  "CO-50": {
+    "category": "CO",
+    "description": "These are non-covered services because this is not deemed a medical necessity by the payer",
+    "appeal_type": "CLINICAL",
+    "p2p_recommended": true,
+    "p2p_success_rate": 0.65,
+    "appeal_pathway": "Level 1 Administrative Appeal → Level 2 External Review (if denied)",
+    "deadline_days": 60,
+    "letter_type": "medical_necessity",
+    "tips": [
+      "Cite specific LCD/NCD policy criteria that are met",
+      "Include clinical literature supporting medical necessity",
+      "Request peer-to-peer review with medical director",
+      "Attach all supporting clinical documentation not included in original submission"
+    ]
+  },
+  "CO-97": {
+    "category": "CO",
+    "description": "The benefit for this service is included in the payment/allowance for another service/procedure that has already been adjudicated",
+    "appeal_type": "BILLING",
+    "p2p_recommended": false,
+    "appeal_pathway": "Corrected Claim Submission",
+    "deadline_days": 90,
+    "letter_type": "corrected_claim",
+    "tips": [
+      "Review CPT bundling rules (CCI edits)",
+      "Submit corrected claim with appropriate modifier (-59, -XU, -XS, -XP, -XE)",
+      "P2P not applicable — this is a billing/coding issue, not clinical"
+    ]
+  },
+  "CO-4": {
+    "category": "CO",
+    "description": "The service/equipment/drug is not covered/allowed by this payer/plan",
+    "appeal_type": "COVERAGE",
+    "p2p_recommended": false,
+    "appeal_pathway": "Coverage Exception Request or Plan Change",
+    "deadline_days": 30,
+    "letter_type": "coverage_exception",
+    "tips": [
+      "Verify correct payer and plan ID submitted",
+      "Check plan benefit document for coverage exclusions",
+      "If excluded: submit coverage exception citing clinical urgency or lack of alternatives"
+    ]
+  },
+  "CO-16": {
+    "category": "CO",
+    "description": "Claim/service lacks information or has submission/billing error(s)",
+    "appeal_type": "ADMINISTRATIVE",
+    "p2p_recommended": false,
+    "appeal_pathway": "Corrected Claim or Additional Documentation Submission",
+    "deadline_days": 60,
+    "letter_type": "resubmission",
+    "tips": [
+      "Review claim for missing fields (diagnosis pointer, modifier, NPI)",
+      "Resubmit with complete information",
+      "Attach EOB with remark codes for context"
+    ]
+  },
+  "PR-96": {
+    "category": "PR",
+    "description": "Non-covered charge(s). At least one Remark Code must be provided",
+    "appeal_type": "COVERAGE",
+    "p2p_recommended": false,
+    "appeal_pathway": "Coverage Exception Request or Patient Financial Assistance",
+    "deadline_days": 30,
+    "letter_type": "coverage_exception",
+    "tips": [
+      "Review remark codes (CARC/RARC) for specific exclusion reason",
+      "If medically necessary and excluded: submit coverage exception with supporting literature",
+      "Consider patient assistance programs for pharmacy denials"
+    ]
+  },
+  "CO-57": {
+    "category": "CO",
+    "description": "Revenue code and Procedure code do not match",
+    "appeal_type": "BILLING",
+    "p2p_recommended": false,
+    "appeal_pathway": "Corrected Claim Submission",
+    "deadline_days": 90,
+    "letter_type": "corrected_claim",
+    "tips": [
+      "Verify revenue code matches CPT/HCPCS according to CMS revenue code-to-procedure crosswalk",
+      "Submit corrected UB-04 with corrected revenue code"
+    ]
+  },
+  "OA-18": {
+    "category": "OA",
+    "description": "Duplicate claim/service",
+    "appeal_type": "ADMINISTRATIVE",
+    "p2p_recommended": false,
+    "appeal_pathway": "Proof of Non-Duplication Submission",
+    "deadline_days": 60,
+    "letter_type": "resubmission",
+    "tips": [
+      "Confirm original claim ICN and date of service",
+      "If truly a duplicate: void the duplicate",
+      "If not a duplicate (different DOS, different service): resubmit with proof"
+    ]
+  },
+  "CO-151": {
+    "category": "CO",
+    "description": "Payment adjusted because the payer deems the information submitted does not support this level of service",
+    "appeal_type": "CLINICAL",
+    "p2p_recommended": true,
+    "p2p_success_rate": 0.55,
+    "appeal_pathway": "Level 1 Administrative Appeal with additional clinical documentation",
+    "deadline_days": 60,
+    "letter_type": "medical_necessity",
+    "tips": [
+      "Attach complete clinical notes supporting level of service billed",
+      "Reference MDM documentation for E&M services",
+      "Consider P2P if level of service is clearly justified clinically"
+    ]
+  }
+}
