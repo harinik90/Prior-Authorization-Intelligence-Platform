@@ -9,6 +9,41 @@ AI-driven Prior Authorization (PA) automation for healthcare providers. Five spe
 
 ---
 
+## Frameworks & SDKs
+
+| Layer | Framework / SDK | Key Class |
+|---|---|---|
+| Agent orchestration | Microsoft Agent Framework (MAF) `1.0.0b260107` | `WorkflowBuilder`, `ChatAgent` |
+| GPT-4o hosted agents | `agent_framework_azure_ai` | `AzureAIAgentClient` |
+| Claude agents | `agent_framework.anthropic` | `AnthropicClient` |
+| Azure identity | `azure.identity.aio` | `AzureCliCredential` (async) |
+| Azure AI Agent Service | `azure.ai.agents` | `AgentsClient` |
+| MCP tools | MAF `HostedMCPTool` | loaded from Claude Code plugin registry |
+| Frontend | Streamlit | `@st.cache_resource` for event loop |
+| FHIR | Da Vinci PAS IG (FHIR R4) | `build_fhir_claim()` in `shared/tools/fhir_claim.py` |
+
+---
+
+## Design Principles
+
+1. **One agent per stage** — each agent has a single, focused responsibility. No monolithic multi-agent graphs.
+
+2. **GPT-4o on Foundry, Claude via APIM** — do not swap clients. `AzureAIAgentClient` for Coverage Prediction and Submission; `AnthropicClient` for Doc Completeness, Policy Matching, Appeal Strategy.
+
+3. **Agents persist on Foundry** — always set `should_cleanup_agent=False`. Never create and delete per-run.
+
+4. **Context accumulates forward** — each agent's output is prepended to the next agent's prompt. Downstream agents see the full reasoning history of prior stages.
+
+5. **MCP for real-time data** — ICD-10 validation, NPI verification, CMS coverage, and clinical literature must use MCP servers, not model general knowledge.
+
+6. **Single event loop** — `AzureAIAgentClient` uses aiohttp bound to the creating loop. One `@st.cache_resource` loop shared across all Streamlit stages. In pytest, `asyncio_default_test_loop_scope = session`.
+
+7. **No PHI anywhere** — patient references use de-identified tokens only. No PHI in env vars, prompts, logs, or outputs.
+
+8. **Mock integrations are fallbacks** — `payer_api.py` and `criteria.py` simulate responses when live endpoints are absent. Never remove the fallback layer.
+
+---
+
 ## Agent Map
 
 | Agent | File | Model | Key Tools |
@@ -24,7 +59,7 @@ AI-driven Prior Authorization (PA) automation for healthcare providers. Five spe
 ## Critical Patterns
 
 ### GPT-4o agents — sys.modules stub (MUST be first)
-`agent_framework_azure_ai._client` imports classes missing in `azure-ai-projects 2.0.0b4`. Pre-stub it before any package import:
+`agent_framework_azure_ai._client` imports classes missing in `azure-ai-projects 2.0.0b4`. Pre-stub before any import:
 ```python
 import sys as _sys, types as _types
 if "agent_framework_azure_ai._client" not in _sys.modules:
@@ -46,9 +81,6 @@ default_headers={"api-key": key, "Ocp-Apim-Subscription-Key": key}
 ```
 Using only `api_key=` is insufficient. APIM is for Claude only — Foundry agents use `AZURE_AI_PROJECT_ENDPOINT` directly.
 
-### Event loop — use persistent loop in Streamlit
-`AzureAIAgentClient` uses aiohttp bound to the creating event loop. Never use `asyncio.run()` per stage. Use `@st.cache_resource` loop in `frontend.py`. In tests, `asyncio_default_test_loop_scope = session` in `pytest.ini`.
-
 ---
 
 ## Environment Variables
@@ -58,7 +90,7 @@ AZURE_AI_PROJECT_ENDPOINT=    # https://<hub>.services.ai.azure.com/api/projects
 AZURE_OPENAI_DEPLOYMENT=gpt-4o
 APIM_ENDPOINT=                # https://<apim>.azure-api.net/claude
 APIM_SUBSCRIPTION_KEY=
-CLAUDE_MODEL=claude-sonnet-4-6
+CLAUDE_MODEL=claude-opus-4-6
 ```
 
 ---
@@ -66,47 +98,34 @@ CLAUDE_MODEL=claude-sonnet-4-6
 ## Key Files
 
 ```
-frontend.py                    Streamlit UI — layout, pipeline runner, MCP panel, activity log
-app.py                         Backend config — CASES, STAGES_FOR, MCP_SERVERS, prompt builders
-agents/pa_pipeline.py          WorkflowBuilder pipeline + _run_one() coroutine
-shared/tools/foundry_client.py  build_foundry_client(agent_name) — sys.modules stub + Foundry client factory
+frontend.py                     Streamlit UI — layout, pipeline runner, MCP panel, activity log
+app.py                          Backend config — CASES, STAGES_FOR, MCP_SERVERS, prompt builders
+agents/pa_pipeline.py           WorkflowBuilder pipeline + _run_one() coroutine
+shared/tools/foundry_client.py  build_foundry_client() — sys.modules stub + Foundry client factory
 shared/tools/anthropic_client.py build_anthropic_client() — APIM-routed AnthropicClient factory
-shared/tools/mcp_loader.py     load_mcp_servers(), mcp_tools() — MCP discovery + HostedMCPTool builder
-shared/tools/fhir_claim.py     build_fhir_claim() — FHIR R4 Claim (PAS IG)
-shared/tools/payer_api.py      submit_pa_to_payer(), poll_pa_status()
-shared/tools/pa_rules.py       check_pa_requirement()
-shared/tools/criteria.py       check_payer_criteria(), get_fhir_documents()
-shared/tools/policy.py         get_payer_policy(), score_clinical_evidence()
-tests/integration/             14 integration tests — all passing
-pytest.ini                     asyncio_mode=auto, asyncio_default_test_loop_scope=session
+shared/tools/mcp_loader.py      mcp_tools() — MCP discovery + HostedMCPTool builder
+shared/tools/fhir_claim.py      build_fhir_claim() — FHIR R4 Claim (PAS IG)
+shared/tools/payer_api.py       submit_pa_to_payer(), poll_pa_status()
 ```
 
 ---
 
 ## FHIR Field Mapping
 
-| Case key | Prompt embed | Tool param | FHIR path |
-|---|---|---|---|
-| `npi` | `Rendering NPI: ...` | `rendering_npi` | `claim.provider.identifier.value` |
-| `cpt` | `CPT: ...` | `cpt_codes: list[str]` | `claim.item[i].productOrService.coding[0].code` |
-| `icd10` | `ICD-10: ...` | `icd10_codes: list[str]` | `claim.diagnosis[i].diagnosisCodeableConcept.coding[0].code` |
-| `subscriber_id` | `Subscriber ID: ...` | `subscriber_id` | `claim.insurance[0].coverage.identifier.value` |
-
-`cpt`/`icd10` are strings in CASES (comma-separated for multi-code); agents convert to lists before calling `build_fhir_claim()`.
+| Case key | Tool param | FHIR path |
+|---|---|---|
+| `npi` | `rendering_npi` | `claim.provider.identifier.value` |
+| `cpt` | `cpt_codes: list[str]` | `claim.item[i].productOrService.coding[0].code` |
+| `icd10` | `icd10_codes: list[str]` | `claim.diagnosis[i].diagnosisCodeableConcept.coding[0].code` |
+| `subscriber_id` | `subscriber_id` | `claim.insurance[0].coverage.identifier.value` |
 
 ---
 
-## Rules
+## MCP Server Map
 
-**HIPAA:** Never log, store, or expose PHI. Use patient tokens only. No PHI in env vars, prompts, or logs.
-
-**Agents:** Use `AzureAIAgentClient` for GPT-4o agents — NOT `AzureOpenAIChatClient`. The sys.modules stub must run before any `agent_framework_azure_ai` import.
-
-**MCP:** For ICD-10, NPI, and CMS coverage lookups — use MCP servers only, not general knowledge.
-
-| Task | MCP Server |
+| MCP Server | Use For |
 |---|---|
-| ICD-10-CM validation | `icd10_codes` |
-| NCD/LCD policy lookup | `cms_coverage` |
-| Provider NPI verification | `npi_registry` |
-| Clinical literature (appeals) | `pubmed` |
+| `icd10_codes` | ICD-10-CM/PCS validation |
+| `cms_coverage` | LCD/NCD Medicare policy lookup |
+| `npi_registry` | Provider NPI verification |
+| `pubmed` | Clinical literature for appeal evidence |
