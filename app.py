@@ -29,187 +29,18 @@ st.set_page_config(
 )
 
 
-# ── Case definitions ───────────────────────────────────────────────────────────
-CASES: dict[str, dict] = {
-    "UC1 — Total Knee Arthroplasty (BCBS-IL PPO · PEND)": {
-        "type": "pipeline",
-        "patient_token": "PT-78432",
-        "cpt": "27447",
-        "cpt_desc": "Total Knee Arthroplasty",
-        "icd10": "M17.11",
-        "icd10_desc": "Primary osteoarthritis, right knee",
-        "payer": "BCBS-IL",
-        "plan": "PPO",
-        "npi": "1003000126",
-        "subscriber_id": "BCB123456789",
-        "clinical_summary": (
-            "Physical therapy x12 weeks documented. NSAIDs trialed and failed. "
-            "Weight-bearing X-ray shows KL Grade 3 medial compartment narrowing. "
-            "BMI NOT documented in the clinical record."
-        ),
-        "expected": "🟡 PEND — 3/6 criteria met, missing BMI + KOOS/KSS + correct NPI",
-    },
-    "UC2 — CT-Guided Lung Biopsy (UHC-MA · APPROVE)": {
-        "type": "pipeline",
-        "patient_token": "PT-11209",
-        "cpt": "32408",
-        "cpt_desc": "CT-guided Lung Biopsy",
-        "icd10": "R91.1, Z87.891",
-        "icd10_desc": "Solitary pulmonary nodule; nicotine dependence history",
-        "payer": "UHC-MA",
-        "plan": "Medicare Advantage",
-        "npi": "1003268343",
-        "subscriber_id": "UHC987654321",
-        "clinical_summary": (
-            "1.2cm RUL nodule on CT chest. Fleischner Society high-risk category. "
-            "Interval growth from 0.8cm on 6-month prior CT. Smoking history 30 pack-years. "
-            "Prior CT on file. Pulmonologist ordering provider NPI 1003268343 (Dr. Mohammed Abdalla, Pulmonary Disease, IL — active). "
-            "Radiologist recommends tissue sampling."
-        ),
-        "expected": "🟢 APPROVE — Complete documentation, Fleischner high-risk",
-    },
-    "UC3 — Cardiac Catheterization (AETNA-COMM · DENY)": {
-        "type": "pipeline",
-        "patient_token": "PT-55671",
-        "cpt": "93458",
-        "cpt_desc": "Left Heart Catheterization",
-        "icd10": "I10, R07.9",
-        "icd10_desc": "Essential hypertension; Chest pain, unspecified",
-        "payer": "AETNA-COMM",
-        "plan": "PPO",
-        "npi": "1417996257",
-        "subscriber_id": "AETNA-COMM-55671",
-        "clinical_summary": (
-            "Cardiologist requesting left heart catheterization for chest discomfort evaluation. "
-            "Exercise stress test result: NEGATIVE for inducible ischemia. Troponins negative x2. "
-            "No documented unstable angina, NSTEMI, or STEMI. No prior cardiac catheterization. "
-            "Medical management (nitrates, beta-blockers) NOT documented as trialed. "
-            "Aetna policy requires positive non-invasive stress test and documented ACS symptoms."
-        ),
-        "expected": "🔴 DENY — Negative stress test; ACS not documented; medical management not trialed",
-    },
-    "UC4 — Biologic Drug / Step Therapy (CIGNA-COMM · PEND)": {
-        "type": "pipeline",
-        "patient_token": "PT-34891",
-        "cpt": "J0135",
-        "cpt_desc": "Adalimumab injection (Humira) 20mg",
-        "icd10": "M06.00",
-        "icd10_desc": "Rheumatoid arthritis, unspecified",
-        "payer": "CIGNA-COMM",
-        "plan": "PPO",
-        "npi": "1750887592",
-        "subscriber_id": "CIGNA-RA-10923",
-        "clinical_summary": (
-            "Rheumatoid arthritis, seropositive (RF positive). "
-            "Methotrexate trial ≥ 3 months at 15mg/week — documented inadequate response. "
-            "Second conventional DMARD trial (leflunomide or hydroxychloroquine) NOT documented. "
-            "Rheumatologist NPI 1750887592 (Dr. Haneen Abdalhadi, Rheumatology, IL — active). "
-            "Requesting adalimumab as first biologic without completing required step therapy."
-        ),
-        "expected": "🟡 PEND — Step therapy incomplete, 2nd DMARD trial missing",
-    },
-    "UC5 — Spinal Fusion Appeal (HUMANA-MA · CO-50 → P2P)": {
-        "type": "appeal",
-        "patient_token": "PT-90234",
-        "cpt": "22612",
-        "cpt_desc": "Posterior Lumbar Fusion L4-L5",
-        "icd10": "M51.16, M47.816",
-        "icd10_desc": "Disc degeneration lumbar; Spondylosis with radiculopathy",
-        "payer": "HUMANA-MA",
-        "plan": "Medicare Advantage",
-        "npi": "1861701351",
-        "subscriber_id": "HUMANA-SPINE-77102",
-        "pa_request_id": "HUMANA-2024-SPINE-77102",
-        "denial_code": "CO-50",
-        "denial_rationale": (
-            "Conservative treatment not exhausted — only 4 months documented, "
-            "6 months required per LCD L36521."
-        ),
-        "clinical_summary": (
-            "MRI shows severe L4-L5 foraminal stenosis. EMG confirms L5 radiculopathy. "
-            "Failed 2 epidural steroid injections. PT x4 months documented. ODI score 62/100."
-        ),
-        "expected": "🔵 P2P Recommendation — CO-50 clinical disagreement",
-    },
-    "UC6 — Emergency Visit (Aetna HMO · No PA Required)": {
-        "type": "single",
-        "agent": "coverage",
-        "patient_token": "N/A",
-        "cpt": "99285",
-        "cpt_desc": "ED Visit, High Complexity",
-        "icd10": "S00.00XA",
-        "icd10_desc": "Any emergency diagnosis",
-        "payer": "Aetna",
-        "plan": "Commercial HMO",
-        "npi": "N/A",
-        "subscriber_id": "N/A",
-        "clinical_summary": (
-            "Does CPT 99285 (ED visit, high complexity) require prior authorization "
-            "under Aetna commercial HMO for any diagnosis?"
-        ),
-        "expected": "⚪ PA Not Required — Emergency CPT exempt",
-    },
-    "UC7 — TKA Resubmission after PEND (BCBS-IL PPO · APPROVE)": {
-        "type": "resubmission",
-        "patient_token": "PT-78432",
-        "cpt": "27447",
-        "cpt_desc": "Total Knee Arthroplasty",
-        "icd10": "M17.11",
-        "icd10_desc": "Primary osteoarthritis, right knee",
-        "payer": "BCBS-IL",
-        "plan": "PPO",
-        "npi": "1972123891",
-        "subscriber_id": "BCB123456789",
-        "clinical_summary": (
-            "Resubmission after PEND. Updated record now includes: "
-            "BMI 34.2 kg/m² documented, KOOS score 42/100, "
-            "NPI 1972123891 verified active orthopedic surgeon (Dr. Hussein Abdulrassoul, Orthopaedic Surgery, IL). "
-            "All 6 BCBS-IL TKA criteria now satisfied."
-        ),
-        "expected": "🟢 APPROVE — All documentation gaps resolved",
-    },
-    "UC8 — Colonoscopy (Unknown Regional HMO · Unknown)": {
-        "type": "single",
-        "agent": "coverage",
-        "patient_token": "PT-00099",
-        "cpt": "45378",
-        "cpt_desc": "Colonoscopy, diagnostic",
-        "icd10": "Z12.11",
-        "icd10_desc": "Encounter for screening for malignant neoplasm of colon",
-        "payer": "Regional HMO",
-        "plan": "Unknown",
-        "npi": "N/A",
-        "subscriber_id": "N/A",
-        "clinical_summary": (
-            "Does CPT 45378 (diagnostic colonoscopy) require prior authorization "
-            "under Regional HMO plan? Payer details unknown — manual verification may be required."
-        ),
-        "expected": "❓ Unknown — Manual payer verification required",
-    },
-}
+# ── Case & stage definitions ───────────────────────────────────────────────────
+# cases.json is rebuilt at startup from usecases/*.json bundles so any new
+# bundle dropped into usecases/ is automatically picked up on the next run.
+import json as _json_boot
+from shared.build_cases import build_cases_json as _build_cases
 
+_DATA_DIR = pathlib.Path(__file__).parent / "data"
 
-# ── Stage definitions ──────────────────────────────────────────────────────────
-# Maps case["type"] → ordered list of stages to display and execute.
-# "key" must match the agent key in _load_agents() below.
-STAGES_FOR: dict[str, list[dict]] = {
-    "pipeline": [
-        {"key": "coverage",   "label": "Coverage Prediction", "model": "Foundry Agent", "icon": "🔍"},
-        {"key": "doc",        "label": "Doc Completeness",    "model": "Claude + MCP",  "icon": "📋"},
-        {"key": "policy",     "label": "Policy Matching",     "model": "Claude",        "icon": "⚖️"},
-        {"key": "submission", "label": "Submission",          "model": "Foundry Agent", "icon": "📤"},
-    ],
-    "appeal": [
-        {"key": "appeal",     "label": "Appeal Strategy",     "model": "Claude + MCP",  "icon": "⚡"},
-    ],
-    "resubmission": [
-        {"key": "doc",        "label": "Doc Completeness",    "model": "Claude + MCP",  "icon": "📋"},
-        {"key": "submission", "label": "Submission",          "model": "Foundry Agent", "icon": "📤"},
-    ],
-    "single": [
-        {"key": "coverage",   "label": "Coverage Prediction", "model": "Foundry Agent", "icon": "🔍"},
-    ],
-}
+CASES: dict[str, dict] = _build_cases()  # reads usecases/, writes data/cases.json
+
+with open(_DATA_DIR / "stages.json", encoding="utf-8") as _f:
+    STAGES_FOR: dict[str, list[dict]] = _json_boot.load(_f)
 
 _DONE_ICON = (
     "<span style='display:inline-flex;align-items:center;justify-content:center;"
@@ -231,19 +62,238 @@ STATUS_ICON = {
 }
 
 # Keywords used to classify a completed stage's outcome
-_NEGATIVE_KW = ("pend", "deny", "denied", "denial", "missing", "not met", "incomplete", "unknown", "pended")
+# "missing" is intentionally excluded — the Doc Completeness agent always emits
+# a "missing" field (e.g. "missing": []) even when documentation is complete.
+# Non-empty missing arrays are caught by the _HAS_MISSING_DOCS regex below.
+_NEGATIVE_KW = ("pend", "deny", "denied", "denial", "not met", "incomplete", "pended", "unknown")
 _POSITIVE_KW  = ("approved", "auth-", "pa not required", "not required", "p2p", "peer-to-peer",
                   "peer to peer", "authorization number", "recommended_action.*pa_not_required")
 
+import re as _re
+import json as _json
+# Matches "missing": ["something", ...] — a non-empty missing-docs array
+_HAS_MISSING_DOCS = _re.compile(r'"missing"\s*:\s*\[\s*"')
 
-def _outcome_state(result: str) -> str:
-    """Return 'done' (blue) or 'pended' (amber) by scanning the stage output."""
+
+def _outcome_state(result: str, key: str = "") -> str:
+    """Return 'done' (green) or 'pended' (amber) by scanning the stage output."""
     low = result.lower()
+    # Doc Completeness: show ✅ only when score >= 85 AND no mandatory items are missing.
+    if key == "doc":
+        parsed = _extract_json(result)
+        if parsed:
+            score = parsed.get("completeness_score") or parsed.get("completeness_pct") or 0
+            try:
+                score = float(str(score).replace("%", ""))
+                if score <= 1.0:   # agent returns 0.0–1.0; normalise to 0–100
+                    score *= 100
+            except (ValueError, TypeError):
+                score = 0
+            mandatory_missing = bool(parsed.get("missing"))  # non-empty list = mandatory gap
+            if score >= 85 and not mandatory_missing:
+                return "done"
+            return "pended"
+        # Fallback if JSON unparseable
+        return "pended" if _HAS_MISSING_DOCS.search(result) else "done"
     if any(k in low for k in _POSITIVE_KW):
         return "done"
+    if _HAS_MISSING_DOCS.search(result):
+        return "pended"
     if any(k in low for k in _NEGATIVE_KW):
         return "pended"
     return "done"  # default to positive if ambiguous
+
+
+# ── Output rendering helpers ───────────────────────────────────────────────────
+
+def _extract_json(text: str) -> dict | None:
+    """Extract and parse the first JSON object from agent output text."""
+    m = _re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, _re.DOTALL)
+    if m:
+        try:
+            return _json.loads(m.group(1))
+        except Exception:
+            pass
+    m = _re.search(r'\{.*\}', text, _re.DOTALL)
+    if m:
+        try:
+            return _json.loads(m.group(0))
+        except Exception:
+            pass
+    return None
+
+
+_DECISION_COLOR: dict[str, str] = {
+    "APPROVED":             "#21c354",
+    "APPROVE":              "#21c354",
+    "PENDED":               "#f5a623",
+    "PEND":                 "#f5a623",
+    "DENIED":               "#e74c3c",
+    "DENY":                 "#e74c3c",
+    "PA NOT REQUIRED":      "#5b9bd5",
+    "PEER_TO_PEER_REVIEW":  "#8e44ad",
+    "LEVEL_1_ADMINISTRATIVE": "#8e44ad",
+}
+
+
+def _decision_badge(label: str) -> str:
+    color = _DECISION_COLOR.get(label.upper(), "#555")
+    return (
+        f"<span style='background:{color};color:#fff;padding:4px 12px;"
+        f"border-radius:4px;font-weight:700;font-size:0.88em;letter-spacing:.03em'>"
+        f"{label}</span>"
+    )
+
+
+def _render_output(key: str, result: str) -> None:
+    """Show a compact summary card for the stage, then hide raw output in an expander."""
+    data = _extract_json(result)
+
+    if data:
+        if key == "coverage":
+            pa_req = data.get("pa_required", "unknown")
+            c1, c2 = st.columns(2)
+            with c1:
+                color = "#21c354" if pa_req is True else ("#e74c3c" if pa_req == "unknown" else "#888")
+                label = "YES" if pa_req is True else ("NO" if pa_req is False else "UNKNOWN")
+                st.markdown(
+                    f"<small><b>PA Required:</b> "
+                    f"<span style='color:{color};font-weight:700'>{label}</span> &nbsp;"
+                    f"| <b>Confidence:</b> {int((data.get('confidence') or 0) * 100)}%</small>",
+                    unsafe_allow_html=True,
+                )
+                if data.get("emergency_exempt"):
+                    st.markdown("<small>⚡ Emergency exempt</small>", unsafe_allow_html=True)
+            with c2:
+                action = data.get("recommended_action", "")
+                if action:
+                    st.markdown(f"<small><b>Action:</b> <code>{action}</code></small>", unsafe_allow_html=True)
+
+        elif key == "doc":
+            score    = data.get("completeness_score")
+            missing  = data.get("missing", [])
+            verified = data.get("provider_verified")
+            icd_ok   = data.get("icd10_valid")
+            items    = data.get("items", [])
+
+            # Separate INSUFFICIENT items (non-mandatory — need review) from
+            # MISSING items (mandatory — block submission)
+            insufficient = [i for i in items if str(i.get("status", "")).upper() == "INSUFFICIENT"]
+
+            c1, c2, c3, c4 = st.columns(4)
+            with c1:
+                st.metric("Completeness", f"{int((score or 0) * 100)}%")
+            with c2:
+                st.metric("Mandatory Missing", len(missing))
+            with c3:
+                # Provider NPI — green if verified (mandatory field), amber if needs validation
+                if verified:
+                    npi_html = "<span style='color:#21c354;font-weight:700'>✅ Verified</span>"
+                else:
+                    npi_html = "<span style='color:#f5a623;font-weight:700'>⚠️ Needs Validation</span>"
+                st.markdown(f"<small><b>Provider NPI</b><br>{npi_html}</small>", unsafe_allow_html=True)
+            with c4:
+                # ICD-10 — green if valid (mandatory), amber if needs validation
+                if icd_ok:
+                    icd_html = "<span style='color:#21c354;font-weight:700'>✅ Valid</span>"
+                else:
+                    icd_html = "<span style='color:#f5a623;font-weight:700'>⚠️ Needs Validation</span>"
+                st.markdown(f"<small><b>ICD-10 Codes</b><br>{icd_html}</small>", unsafe_allow_html=True)
+
+            # Mandatory missing items — block submission
+            if missing:
+                st.markdown(
+                    "<small><b style='color:#e74c3c'>🔴 Mandatory — missing documentation:</b></small>",
+                    unsafe_allow_html=True,
+                )
+                for item in missing:
+                    st.markdown(f"<small>&nbsp;&nbsp;• {item}</small>", unsafe_allow_html=True)
+
+            # Non-mandatory insufficient items — flag for review but don't block
+            if insufficient:
+                st.markdown(
+                    "<small><b style='color:#f5a623'>⚠️ Non-mandatory — recommended to validate:</b></small>",
+                    unsafe_allow_html=True,
+                )
+                for i in insufficient:
+                    note = f" — {i['note']}" if i.get("note") else ""
+                    st.markdown(
+                        f"<small>&nbsp;&nbsp;• {i.get('criterion', '')}{note}</small>",
+                        unsafe_allow_html=True,
+                    )
+
+        elif key == "policy":
+            prob = data.get("approval_probability")
+            assessment = data.get("assessment", "")
+            not_met = data.get("criteria_not_met", [])
+            c1, c2 = st.columns(2)
+            with c1:
+                st.metric("Approval Probability", f"{prob}%")
+            with c2:
+                if assessment:
+                    st.markdown(
+                        f"<small><b>Assessment:</b></small><br>{_decision_badge(assessment)}",
+                        unsafe_allow_html=True,
+                    )
+            if not_met:
+                st.markdown("<small><b>Criteria not met:</b></small>", unsafe_allow_html=True)
+                for c in not_met:
+                    st.markdown(f"<small>• {c}</small>", unsafe_allow_html=True)
+
+        elif key == "submission":
+            decision = data.get("decision", "")
+            auth = data.get("auth_number")
+            denial_code = data.get("denial_code")
+            denial_rationale = data.get("denial_rationale")
+            next_action = data.get("next_action", "")
+            if decision:
+                st.markdown(
+                    f"<b style='font-size:1.05em'>Final Decision:</b>&nbsp;&nbsp;"
+                    f"{_decision_badge(decision)}",
+                    unsafe_allow_html=True,
+                )
+            if auth:
+                vf, vt = data.get("valid_from", ""), data.get("valid_to", "")
+                st.markdown(
+                    f"<small><b>Auth #:</b> <code>{auth}</code>"
+                    f"{f'  |  <b>Valid:</b> {vf} → {vt}' if vf else ''}</small>",
+                    unsafe_allow_html=True,
+                )
+            if denial_code:
+                st.markdown(f"<small><b>Denial Code:</b> <code>{denial_code}</code></small>", unsafe_allow_html=True)
+            if denial_rationale:
+                st.markdown(f"<small><b>Rationale:</b> {denial_rationale}</small>", unsafe_allow_html=True)
+            if next_action:
+                st.markdown(f"<small><b>Next Action:</b> <code>{next_action}</code></small>", unsafe_allow_html=True)
+
+        elif key == "appeal":
+            rec = data.get("recommendation", "")
+            urgency = data.get("urgency", "")
+            evidence = data.get("evidence_cited", [])
+            next_action = data.get("next_action", "")
+            if rec:
+                st.markdown(
+                    f"<b style='font-size:1.05em'>Recommendation:</b>&nbsp;&nbsp;"
+                    f"{_decision_badge(rec)}",
+                    unsafe_allow_html=True,
+                )
+            parts = []
+            if urgency:
+                parts.append(f"<b>Urgency:</b> <code>{urgency}</code>")
+            if next_action:
+                parts.append(f"<b>Next Action:</b> <code>{next_action}</code>")
+            if parts:
+                st.markdown(f"<small>{' &nbsp;|&nbsp; '.join(parts)}</small>", unsafe_allow_html=True)
+            if evidence:
+                st.markdown(
+                    "<small><b>Evidence cited:</b> "
+                    + " ".join(f"<code>{e}</code>" for e in evidence)
+                    + "</small>",
+                    unsafe_allow_html=True,
+                )
+
+    with st.expander("📄 Full agent output", expanded=False):
+        st.markdown(result)
 
 
 # ── MCP server metadata ────────────────────────────────────────────────────────
@@ -334,7 +384,7 @@ def _get_background_loop() -> asyncio.AbstractEventLoop:
     return loop
 
 
-def run_async(coro, timeout: float = 300.0):
+def run_async(coro, timeout: float = 720.0):
     """Submit a coroutine to the persistent background loop and block until done."""
     future = asyncio.run_coroutine_threadsafe(coro, _get_background_loop())
     return future.result(timeout=timeout)
@@ -409,7 +459,13 @@ st.caption(
 
 # ── Case selector + form (compact scrollable strip) ───────────────────────────
 with st.container(height=270, border=False):
-    selected = st.selectbox("**Select a case**", list(CASES.keys()), index=0)
+    def _case_display(key: str) -> str:
+        """Strip '· OUTCOME' from the dropdown label — shown separately as Expected."""
+        if ' · ' in key:
+            return key[:key.index(' · ')] + ')'
+        return key
+
+    selected = st.selectbox("**Select a case**", list(CASES.keys()), index=0, format_func=_case_display)
     case   = CASES[selected]
     stages = STAGES_FOR[case["type"]]
 
@@ -435,7 +491,15 @@ with st.container(height=270, border=False):
     st.text_area("Clinical Summary", value=case["clinical_summary"], disabled=True, height=68, key="f_cs")
     st.caption(f"**Expected:** {case['expected']}")
 
-run_btn = st.button("▶  Run Pipeline", type="primary", use_container_width=True)
+if "pipeline_running" not in st.session_state:
+    st.session_state.pipeline_running = False
+
+run_btn = st.button(
+    "▶  Validate",
+    type="primary",
+    use_container_width=True,
+    disabled=st.session_state.pipeline_running,
+)
 st.divider()
 
 # ── 2-column layout: Left status panel (stacked) | Right pipeline output ──────
@@ -454,6 +518,10 @@ _render_stages(stages, {}, {}, {}, stage_slot)
 
 # ── Pipeline execution ─────────────────────────────────────────────────────────
 if run_btn:
+        st.session_state.pipeline_running = True
+        st.rerun()
+
+if st.session_state.pipeline_running:
         agents  = _load_agents()
         _run_one = agents["_run_one"]
 
@@ -469,6 +537,13 @@ if run_btn:
                    f"▶ started · **{case['patient_token']}** · {case['payer']}")
         _refresh_left()
 
+        _MCP_RETRY_LIMIT = 2  # retry up to 2× on transient MCP connection errors
+        _MCP_ERR_SIGNALS = ("abnormal_closure", "connection error", "mcp server", "1006")
+
+        def _is_mcp_error(exc: Exception) -> bool:
+            msg = str(exc).lower()
+            return any(sig in msg for sig in _MCP_ERR_SIGNALS)
+
         def _run_stage(key: str, agent, prompt: str, stage_meta: dict) -> str:
             states[key] = "running"
             mcp_list = STAGE_MCP.get(key, [])
@@ -479,20 +554,40 @@ if run_btn:
                        f"started{(' · ' + note) if note else ''}")
             _refresh_left()
             t0 = time.time()
-            try:
-                result = run_async(_run_one(agent, prompt))
-                states[key] = _outcome_state(result)
-                elapsed = f"{time.time() - t0:.0f}s"
-                for srv in STAGE_MCP.get(key, []):
-                    mcp_outcomes[srv] = states[key]
-                outcome_icon = "✓" if states[key] == "done" else "🟡"
-                _log_stage(stage_activity, key, f"{outcome_icon} done in {elapsed}")
-            except Exception as exc:
-                result = f"**Pipeline error:** `{exc}`"
-                states[key] = "error"
-                for srv in STAGE_MCP.get(key, []):
-                    mcp_outcomes[srv] = "error"
-                _log_stage(stage_activity, key, f"🔴 error: `{exc}`")
+            attempt = 0
+            result = ""
+            while attempt <= _MCP_RETRY_LIMIT:
+                try:
+                    result = run_async(_run_one(agent, prompt))
+                    states[key] = _outcome_state(result, key)
+                    elapsed = f"{time.time() - t0:.0f}s"
+                    for srv in STAGE_MCP.get(key, []):
+                        mcp_outcomes[srv] = states[key]
+                    outcome_icon = "✓" if states[key] == "done" else "🟡"
+                    _log_stage(stage_activity, key, f"{outcome_icon} done in {elapsed}")
+                    break
+                except Exception as exc:
+                    attempt += 1
+                    if _is_mcp_error(exc) and attempt <= _MCP_RETRY_LIMIT:
+                        _log_stage(stage_activity, key,
+                                   f"⚠️ MCP connection drop — retry {attempt}/{_MCP_RETRY_LIMIT}")
+                        _refresh_left()
+                        time.sleep(3)
+                        continue
+                    import traceback
+                    tb = traceback.format_exc()
+                    if isinstance(exc, TimeoutError):
+                        elapsed = f"{time.time() - t0:.0f}s"
+                        result = (f"**Agent timeout** after {elapsed} — the agent did not respond "
+                                  f"within the allowed window. Check Azure Foundry / APIM connectivity.")
+                    else:
+                        result = f"**Pipeline error:** `{exc}`\n\n```\n{tb}\n```"
+                    states[key] = "error"
+                    for srv in STAGE_MCP.get(key, []):
+                        mcp_outcomes[srv] = "error"
+                    _log_stage(stage_activity, key, f"🔴 error: `{exc}`")
+                    print(f"[STAGE ERROR: {key}]\n{tb}", flush=True)
+                    break
             times[key] = f"{time.time() - t0:.0f}"
             _refresh_left()
             return result
@@ -513,43 +608,46 @@ if run_btn:
                         label=f"{'✅' if states['coverage'] == 'done' else '❌'} Coverage Prediction",
                         state="complete" if states["coverage"] == "done" else "error",
                     )
-                    st.markdown(out_cov)
+                    _render_output("coverage", out_cov)
 
-                doc_prompt = f"{pa_prompt}\n\n--- Coverage Prediction ---\n{out_cov}"
-                with st.status("📋 Step 2 — Doc Completeness", expanded=True) as st2:
-                    out_doc = _run_stage("doc", agents["doc"], doc_prompt, _smeta("doc"))
-                    st2.update(
-                        label=f"{'✅' if states['doc'] == 'done' else '❌'} Doc Completeness",
-                        state="complete" if states["doc"] == "done" else "error",
-                    )
-                    st.markdown(out_doc)
+                if states["coverage"] != "error":
+                    doc_prompt = f"{pa_prompt}\n\n--- Coverage Prediction ---\n{out_cov}"
+                    with st.status("📋 Step 2 — Doc Completeness", expanded=True) as st2:
+                        out_doc = _run_stage("doc", agents["doc"], doc_prompt, _smeta("doc"))
+                        st2.update(
+                            label=f"{'✅' if states['doc'] == 'done' else '❌'} Doc Completeness",
+                            state="complete" if states["doc"] == "done" else "error",
+                        )
+                        _render_output("doc", out_doc)
 
-                policy_prompt = (
-                    f"{pa_prompt}\n\n"
-                    f"--- Coverage Prediction ---\n{out_cov}\n\n"
-                    f"--- Documentation Completeness ---\n{out_doc}"
-                )
-                with st.status("⚖️ Step 3 — Policy Matching", expanded=True) as st3:
-                    out_pol = _run_stage("policy", agents["policy"], policy_prompt, _smeta("policy"))
-                    st3.update(
-                        label=f"{'✅' if states['policy'] == 'done' else '❌'} Policy Matching",
-                        state="complete" if states["policy"] == "done" else "error",
+                if states.get("doc") != "error" and states["coverage"] != "error":
+                    policy_prompt = (
+                        f"{pa_prompt}\n\n"
+                        f"--- Coverage Prediction ---\n{out_cov}\n\n"
+                        f"--- Documentation Completeness ---\n{out_doc}"
                     )
-                    st.markdown(out_pol)
+                    with st.status("⚖️ Step 3 — Policy Matching", expanded=True) as st3:
+                        out_pol = _run_stage("policy", agents["policy"], policy_prompt, _smeta("policy"))
+                        st3.update(
+                            label=f"{'✅' if states['policy'] == 'done' else '❌'} Policy Matching",
+                            state="complete" if states["policy"] == "done" else "error",
+                        )
+                        _render_output("policy", out_pol)
 
-                sub_prompt = (
-                    f"{pa_prompt}\n\n"
-                    f"--- Coverage Prediction ---\n{out_cov}\n\n"
-                    f"--- Documentation Completeness ---\n{out_doc}\n\n"
-                    f"--- Policy Matching ---\n{out_pol}"
-                )
-                with st.status("📤 Step 4 — Submission", expanded=True) as st4:
-                    out_sub = _run_stage("submission", agents["submission"], sub_prompt, _smeta("submission"))
-                    st4.update(
-                        label=f"{'✅' if states['submission'] == 'done' else '❌'} Submission",
-                        state="complete" if states["submission"] == "done" else "error",
+                if all(states.get(k) != "error" for k in ("coverage", "doc", "policy")):
+                    sub_prompt = (
+                        f"{pa_prompt}\n\n"
+                        f"--- Coverage Prediction ---\n{out_cov}\n\n"
+                        f"--- Documentation Completeness ---\n{out_doc}\n\n"
+                        f"--- Policy Matching ---\n{out_pol}"
                     )
-                    st.markdown(out_sub)
+                    with st.status("📤 Step 4 — Submission", expanded=True) as st4:
+                        out_sub = _run_stage("submission", agents["submission"], sub_prompt, _smeta("submission"))
+                        st4.update(
+                            label=f"{'✅' if states['submission'] == 'done' else '❌'} Submission",
+                            state="complete" if states["submission"] == "done" else "error",
+                        )
+                        _render_output("submission", out_sub)
 
             # ── Appeal-only pipeline ───────────────────────────────────────────
             elif case["type"] == "appeal":
@@ -560,7 +658,7 @@ if run_btn:
                         label=f"{'✅' if states['appeal'] == 'done' else '❌'} Appeal Strategy",
                         state="complete" if states["appeal"] == "done" else "error",
                     )
-                    st.markdown(out_ap)
+                    _render_output("appeal", out_ap)
 
             # ── Resubmission pipeline (Doc Completeness + Submission only) ──────
             elif case["type"] == "resubmission":
@@ -572,16 +670,17 @@ if run_btn:
                         label=f"{'✅' if states['doc'] == 'done' else '❌'} Doc Completeness",
                         state="complete" if states["doc"] == "done" else "error",
                     )
-                    st.markdown(out_doc)
+                    _render_output("doc", out_doc)
 
-                sub_prompt = f"{pa_prompt}\n\n--- Doc Completeness (Resubmission) ---\n{out_doc}"
-                with st.status("📤 Step 2 — Submission", expanded=True) as sts:
-                    out_sub = _run_stage("submission", agents["submission"], sub_prompt, _smeta("submission"))
-                    sts.update(
-                        label=f"{'✅' if states['submission'] == 'done' else '❌'} Submission",
-                        state="complete" if states["submission"] == "done" else "error",
-                    )
-                    st.markdown(out_sub)
+                if states["doc"] != "error":
+                    sub_prompt = f"{pa_prompt}\n\n--- Doc Completeness (Resubmission) ---\n{out_doc}"
+                    with st.status("📤 Step 2 — Submission", expanded=True) as sts:
+                        out_sub = _run_stage("submission", agents["submission"], sub_prompt, _smeta("submission"))
+                        sts.update(
+                            label=f"{'✅' if states['submission'] == 'done' else '❌'} Submission",
+                            state="complete" if states["submission"] == "done" else "error",
+                        )
+                        _render_output("submission", out_sub)
 
             # ── Single-agent check ─────────────────────────────────────────────
             elif case["type"] == "single":
@@ -591,7 +690,7 @@ if run_btn:
                         label=f"{'✅' if states['coverage'] == 'done' else '❌'} Coverage Prediction",
                         state="complete" if states["coverage"] == "done" else "error",
                     )
-                    st.markdown(out_cov)
+                    _render_output("coverage", out_cov)
 
         # ── Final summary banner (outside scrollable container) ───────────────
         all_done  = all(v == "done" for v in states.values())
@@ -600,6 +699,8 @@ if run_btn:
         _log_stage(stage_activity, "_pipeline",
                    f"{'🏁' if all_done else '⚠️'} pipeline {final_msg}")
         _refresh_left()
+
+        st.session_state.pipeline_running = False
 
         if all_done:
             st.success(f"Pipeline complete in {total_s}s · Expected: {case['expected']}")

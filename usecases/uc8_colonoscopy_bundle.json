@@ -1,0 +1,75 @@
+{
+  "resourceType": "Bundle",
+  "id": "uc8-colonoscopy-bundle",
+  "type": "collection",
+  "_pa_meta": {
+    "label": "UC8 — Colonoscopy (Unknown Regional HMO · Unknown)",
+    "type": "single",
+    "agent": "coverage",
+    "expected": "❓ Unknown — Manual payer verification required",
+    "sort_order": 8,
+    "npi": "N/A",
+    "subscriber_id": "N/A",
+    "clinical_summary": "Does CPT 45378 (diagnostic colonoscopy) require prior authorization under Regional HMO plan? Payer details unknown — manual verification may be required."
+  },
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PT-00099",
+        "identifier": [{ "system": "urn:pa-system:patient-token", "value": "PT-00099" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-regional-hmo-00099",
+        "status": "active",
+        "subscriber": { "reference": "Patient/PT-00099" },
+        "beneficiary": { "reference": "Patient/PT-00099" },
+        "payor": [{ "display": "Regional HMO", "identifier": { "value": "Regional HMO" } }],
+        "class": [
+          { "type": { "coding": [{ "code": "plan" }] }, "value": "Unknown", "name": "Regional HMO" }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "sr-colonoscopy-00099",
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "45378",
+              "display": "Colonoscopy, flexible; diagnostic, including collection of specimen(s) by brushing or washing, when performed"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-00099" },
+        "insurance": [{ "reference": "Coverage/cov-regional-hmo-00099" }],
+        "reasonReference": [{ "reference": "Condition/cond-colon-screening" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-colon-screening",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "Z12.11",
+              "display": "Encounter for screening for malignant neoplasm of colon"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-00099" },
+        "note": [{ "text": "Routine colorectal cancer screening. Payer is Regional HMO — plan details unknown, PA requirement cannot be confirmed without manual payer verification." }]
+      }
+    }
+  ]
+}

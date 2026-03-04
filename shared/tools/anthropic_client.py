@@ -1,7 +1,9 @@
 """
 Anthropic client factory — shared by Claude agents routed through Azure APIM.
 
-APIM requires both api-key and Ocp-Apim-Subscription-Key headers.
+APIM accepts the subscription key as either the Ocp-Apim-Subscription-Key header
+OR the ?subscription-key query parameter. We send both to maximise compatibility
+across different APIM policy configurations.
 """
 from __future__ import annotations
 
@@ -23,6 +25,7 @@ def build_anthropic_client() -> AnthropicClient:
                 "api-key": apim_key,
                 "Ocp-Apim-Subscription-Key": apim_key,
             },
+            default_query={"subscription-key": apim_key},
             timeout=600.0,
         ),
     )

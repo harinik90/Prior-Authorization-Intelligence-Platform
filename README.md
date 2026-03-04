@@ -33,11 +33,11 @@ Appeal Strategy Agent – Analyzes denial codes, pulls clinical literature via M
 
 | # | Agent | Model | Responsibility |
 |---|---|---|---|
-| 1 | **Coverage Prediction** | GPT-4o (Azure AI Foundry) | Determines if PA is required for a CPT + ICD-10 + payer combination |
-| 2 | **Doc Completeness** | Claude Opus 4.6 (via APIM) | Reviews clinical notes against payer criteria; flags missing documentation |
-| 3 | **Policy Matching** | Claude Opus 4.6 (via APIM) | Scores the case against payer LCD/NCD policy; predicts approval probability |
-| 4 | **Submission** | GPT-4o (Azure AI Foundry) | Assembles FHIR Claim (PAS IG), submits to payer endpoint, polls for decision |
-| 5 | **Appeal Strategy** | Claude Opus 4.6 (via APIM) | Analyzes denial codes, drafts appeal letters, recommends peer-to-peer review |
+| 1 | **Coverage Prediction** | GPT-4o (Microsoft Foundry) | Determines if PA is required for a CPT + ICD-10 + payer combination |
+| 2 | **Doc Completeness** | Claude Opus 4.6 (Microsoft Foundry) | Reviews clinical notes against payer criteria; flags missing documentation |
+| 3 | **Policy Matching** | Claude Opus 4.6 (Microsoft Foundry) | Scores the case against payer LCD/NCD policy; predicts approval probability |
+| 4 | **Submission** | GPT-4o (Microsoft Foundry) | Assembles FHIR Claim (PAS IG), submits to payer endpoint, polls for decision |
+| 5 | **Appeal Strategy** | Claude Opus 4.6 (Microsoft Foundry) | Analyzes denial codes, drafts appeal letters, recommends peer-to-peer review |
 
 ![Architecture Diagram](docs/screenshots/architecture.png)
 
@@ -46,8 +46,8 @@ Appeal Strategy Agent – Analyzes denial codes, pulls clinical literature via M
 | Component | Technology |
 |---|---|
 | Agent orchestration | Microsoft Agent Framework (MAF) `1.0.0b260107` |
-| GPT-4o agents | `AzureAIAgentClient` — Azure AI Foundry hosted agents |
-| Claude agents | `AnthropicClient` — routed via Azure APIM |
+| GPT-4o agents | `AzureAIAgentClient` — Microsoft Foundry hosted agents |
+| Claude agents | `AnthropicClient` — routed via Microsoft Foundry |
 | MCP tools | `HostedMCPTool` — globally installed Claude Code plugins |
 | Frontend | Streamlit |
 | Runtime | Python 3.11+ |
@@ -90,12 +90,20 @@ python -m pytest tests/integration/test_pa_pipeline.py -v
 ### Case Selector
 ![Case Selector](docs/screenshots/01_case_selector.png)
 
-### UC1 — Total Knee Arthroplasty · BCBS-IL PPO · PEND
-> Doc Completeness flags missing BMI and KOOS/KSS score. Policy Matching scores 3/6 criteria met. Submission returns PEND.
+---
 
-![UC1 Pipeline Running](docs/screenshots/01_uc1_pipelinerunning.png)
+### UC2 — CT-Guided Lung Biopsy · UHC Medicare Advantage · APPROVE
 
-![UC1 Prior Auth Report](docs/screenshots/01_uc1_priorauthreport.png)
+> Coverage Prediction confirms PA required (95% confidence). Doc Completeness scores 95% with 0 mandatory items missing, NPI verified, ICD-10 valid. Policy Matching returns 97% approval probability — APPROVE.
+
+**Coverage Prediction output expanded**
+![UC2 Coverage Prediction](docs/screenshots/01_gaps_prior%20auth%20report.png)
+
+**Doc Completeness — MCP validation in progress**
+![UC2 MCP Validation](docs/screenshots/01_MCP_validation.png)
+
+**Policy Matching — 97% approval, APPROVE**
+![UC2 Policy Matching](docs/screenshots/01_policymatching.png)
 
 ---
 
@@ -111,24 +119,54 @@ python -m pytest tests/integration/test_pa_pipeline.py -v
 | UC7 | TKA Resubmission after PEND | BCBS-IL PPO | 27447 | Doc + Submission only | 🟢 APPROVE — all gaps resolved |
 | UC8 | Colonoscopy, Unknown Payer | Regional HMO | 45378 | Coverage check only | ❓ Unknown — manual verification |
 
-See [usecases.md](usecases.md) for full clinical scenarios and agent execution traces. See [glossary.md](glossary.md) for definitions of clinical, FHIR, and AI terms used throughout.
+See [usecases.md](usecases.md) for full clinical scenarios and expected agent execution traces for every use case.
+See [CLAUDE.md](CLAUDE.md) for AI coding instructions, design principles, and critical implementation patterns.
+See [glossary.md](glossary.md) for definitions of clinical, FHIR, and AI terms used throughout.
 
 ---
 
 ## Project Structure
 
 ```
-├── frontend.py                     Streamlit UI
-├── app.py                          Case definitions, stage config, prompt builders
+├── app.py                          Streamlit UI, case loader, stage config, prompt builders
 ├── agents/
-│   ├── pa_pipeline.py              WorkflowBuilder pipeline
-│   ├── coverage_prediction/        GPT-4o Foundry hosted agent
+│   ├── pa_pipeline.py              _run_one() coroutine — calls agent.run() directly
+│   ├── coverage_prediction/        GPT-4o Microsoft Foundry agent
 │   ├── doc_completeness/           Claude agent + MCP tools
 │   ├── policy_matching/            Claude agent
-│   ├── submission/                 GPT-4o Foundry hosted agent
+│   ├── submission/                 GPT-4o Microsoft Foundry agent
 │   └── appeal_strategy/            Claude agent + MCP tools
-├── shared/tools/                   PA rules, FHIR claim builder, payer API, MCP loader
-├── tests/integration/              14 integration tests (live Azure calls)
+├── shared/
+│   ├── build_cases.py              Generates data/cases.json from usecases/ FHIR bundles
+│   ├── fhir/validate.py            FHIR R4 resource validation helpers
+│   └── tools/
+│       ├── anthropic_client.py     AnthropicClient factory (Azure APIM routing)
+│       ├── foundry_client.py       AzureAIAgentClient factory (sys.modules stub + agent reuse)
+│       ├── mcp_loader.py           MCP server discovery + HostedMCPTool builder
+│       ├── fhir_claim.py           build_fhir_claim() — FHIR R4 Claim (Da Vinci PAS IG)
+│       ├── payer_api.py            submit_pa_to_payer(), poll_pa_status() (mock + live)
+│       ├── pa_rules.py             Payer PA requirement rules
+│       ├── criteria.py             Payer documentation criteria
+│       └── policy.py               Policy matching scoring
+├── usecases/                       FHIR R4 bundles — one per use case (auto-loaded)
+│   ├── uc1_tka_bundle.json
+│   ├── uc2_lung_biopsy_bundle.json
+│   ├── uc3_cath_bundle.json
+│   ├── uc4_biologic_bundle.json
+│   ├── uc5_spinal_fusion_bundle.json
+│   ├── uc6_ed_visit_bundle.json
+│   ├── uc7_tka_resubmission_bundle.json
+│   └── uc8_colonoscopy_bundle.json
+├── data/
+│   ├── cases.json                  Auto-generated from usecases/ at startup
+│   ├── stages.json                 Stage definitions and MCP/tool assignments
+│   ├── payer_pa_rules.json         Payer PA requirement rules
+│   ├── payer_criteria.json         Documentation criteria per payer/CPT
+│   └── denial_codes.json           Denial code definitions and appeal guidance
+├── tests/integration/
+│   └── test_pa_pipeline.py         Integration tests (live Azure calls)
+├── docs/screenshots/               UI screenshots
+├── conftest.py                     pytest asyncio session-scope loop config
 ├── CLAUDE.md                       AI coding instructions and guardrails
 └── .env.example                    Required environment variables
 ```

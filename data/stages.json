@@ -1,0 +1,18 @@
+{
+  "pipeline": [
+    {"key": "coverage",   "label": "Coverage Prediction", "model": "Foundry Agent", "icon": "🔍"},
+    {"key": "doc",        "label": "Doc Completeness",    "model": "Claude + MCP",  "icon": "📋"},
+    {"key": "policy",     "label": "Policy Matching",     "model": "Claude",        "icon": "⚖️"},
+    {"key": "submission", "label": "Submission",          "model": "Foundry Agent", "icon": "📤"}
+  ],
+  "appeal": [
+    {"key": "appeal",     "label": "Appeal Strategy",     "model": "Claude + MCP",  "icon": "⚡"}
+  ],
+  "resubmission": [
+    {"key": "doc",        "label": "Doc Completeness",    "model": "Claude + MCP",  "icon": "📋"},
+    {"key": "submission", "label": "Submission",          "model": "Foundry Agent", "icon": "📤"}
+  ],
+  "single": [
+    {"key": "coverage",   "label": "Coverage Prediction", "model": "Foundry Agent", "icon": "🔍"}
+  ]
+}

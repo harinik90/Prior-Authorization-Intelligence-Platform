@@ -1,0 +1,64 @@
+{
+  "resourceType": "Bundle",
+  "id": "uc6-ed-visit-bundle",
+  "type": "collection",
+  "_pa_meta": {
+    "label": "UC6 — Emergency Visit (Aetna HMO · No PA Required)",
+    "type": "single",
+    "agent": "coverage",
+    "expected": "⚪ PA Not Required — Emergency CPT exempt",
+    "sort_order": 6,
+    "patient_token": "N/A",
+    "npi": "N/A",
+    "subscriber_id": "N/A",
+    "clinical_summary": "Does CPT 99285 (ED visit, high complexity) require prior authorization under Aetna commercial HMO for any diagnosis?"
+  },
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-aetna-hmo-ed",
+        "status": "active",
+        "payor": [{ "display": "Aetna", "identifier": { "value": "Aetna" } }],
+        "class": [
+          { "type": { "coding": [{ "code": "plan" }] }, "value": "Commercial HMO", "name": "Aetna Commercial HMO" }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "sr-ed-visit",
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "99285",
+              "display": "Emergency department visit, high medical decision making"
+            }
+          ]
+        },
+        "insurance": [{ "reference": "Coverage/cov-aetna-hmo-ed" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-emergency-dx",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "S00.00XA",
+              "display": "Unspecified superficial injury of scalp, initial encounter"
+            }
+          ]
+        },
+        "note": [{ "text": "Emergency presentation — any acute diagnosis. CPT 99285 (ED visit, high complexity) evaluated for PA requirement under Aetna commercial HMO." }]
+      }
+    }
+  ]
+}

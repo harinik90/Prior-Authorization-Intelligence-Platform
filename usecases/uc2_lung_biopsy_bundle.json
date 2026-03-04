@@ -2,6 +2,14 @@
   "resourceType": "Bundle",
   "id": "uc2-lung-biopsy-pa-bundle",
   "type": "collection",
+  "_pa_meta": {
+    "label": "UC2 — CT-Guided Lung Biopsy (UHC-MA · APPROVE)",
+    "type": "pipeline",
+    "expected": "🟢 APPROVE — Complete documentation, Fleischner high-risk",
+    "sort_order": 2,
+    "npi": "1003268343",
+    "clinical_summary": "1.2cm RUL nodule on CT chest. Fleischner Society high-risk category. Interval growth from 0.8cm on 6-month prior CT. Smoking history 30 pack-years. Prior CT on file. Pulmonologist ordering provider NPI 1003268343 (Dr. Mohammed Abdalla, Pulmonary Disease, IL — active). Radiologist recommends tissue sampling."
+  },
   "entry": [
     {
       "resource": {

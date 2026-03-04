@@ -10,11 +10,11 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
 
 | # | Stage | Model | Provider | MCP Servers | Python Tools |
 |---|-------|-------|----------|-------------|--------------|
-| 1 | Coverage Prediction | GPT-4o | Azure AI Foundry | ✗ None | ✓ `check_pa_requirement` |
-| 2 | Doc Completeness | Claude | APIM → Anthropic | ✓ `npi_registry` `cms_coverage` `icd10_codes` | ✗ None |
-| 3 | Policy Matching | Claude | APIM → Anthropic | ✓ `cms_coverage` `pubmed` | ✓ `check_payer_criteria` `score_clinical_evidence` |
-| 4 | Submission | GPT-4o | Azure AI Foundry | ✗ None | ✓ `build_fhir_claim` `submit_pa_to_payer` `poll_pa_status` |
-| 5 | Appeal Strategy | Claude | APIM → Anthropic | ✓ `cms_coverage` `pubmed` `npi_registry` | ✓ `lookup_denial_reason` |
+| 1 | Coverage Prediction | GPT-4o | Microsoft Foundry | ✗ None | ✓ `check_pa_requirement` |
+| 2 | Doc Completeness | Claude | Microsoft Foundry | ✓ `npi_registry` `cms_coverage` `icd10_codes` | ✗ None |
+| 3 | Policy Matching | Claude | Microsoft Foundry | ✓ `cms_coverage` `pubmed` | ✓ `check_payer_criteria` `score_clinical_evidence` |
+| 4 | Submission | GPT-4o | Microsoft Foundry | ✗ None | ✓ `build_fhir_claim` `submit_pa_to_payer` `poll_pa_status` |
+| 5 | Appeal Strategy | Claude | Microsoft Foundry | ✓ `cms_coverage` `pubmed` `npi_registry` | ✓ `lookup_denial_reason` |
 
 ### What Each Stage Checks
 
@@ -64,7 +64,7 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
    → pa_required: true, confidence: 0.96
    → "BCBS-IL requires PA for all TKA procedures"
 
-2. Doc Completeness  (Claude · APIM + MCP)
+2. Doc Completeness  (Claude · Microsoft Foundry + MCP)
    MCP: icd10_codes   → validate M17.11 (billable leaf)
    MCP: cms_coverage  → fetch LCD L35506 (Hip & Knee Arthroplasty)
    MCP: npi_registry  → verify NPI 1003000126 → specialty: Hospitalist (NOT Orthopaedic Surgery)
@@ -78,7 +78,7 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
    → completeness_score: 0.50, missing: ["BMI_documentation", "functional_score"]
    → provider_verified: false
 
-3. Policy Matching  (Claude · APIM + MCP)
+3. Policy Matching  (Claude · Microsoft Foundry + MCP)
    → policy_match_score: 0.56, approval_probability: 52%
    → criteria_not_met: ["BMI_threshold", "functional_score", "NPI_specialty"]
 
@@ -132,7 +132,7 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
    → pa_required: true, confidence: 0.99
    → "Invasive diagnostic procedure — PA required under UHC-MA"
 
-2. Doc Completeness  (Claude · APIM + MCP)
+2. Doc Completeness  (Claude · Microsoft Foundry + MCP)
    MCP: icd10_codes   → validate R91.1, Z87.891
    MCP: cms_coverage  → NCD 240.1 (CT), LCD L38672 (Biopsy criteria)
    MCP: npi_registry  → verify NPI 1003268343 → Pulmonary Disease specialty confirmed
@@ -142,7 +142,7 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
    ✅ Pulmonologist ordering provider verified
    → completeness_score: 0.94, missing: []
 
-3. Policy Matching  (Claude · APIM + MCP)
+3. Policy Matching  (Claude · Microsoft Foundry + MCP)
    MCP: cms_coverage  → LCD L38672 criteria fully met
    → policy_match_score: 0.91, approval_probability: 91%
 
@@ -199,7 +199,7 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
    → pa_required: true, confidence: 0.97
    → "Aetna requires PA for cardiac catheterization on all plan types"
 
-2. Doc Completeness  (Claude · APIM + MCP)
+2. Doc Completeness  (Claude · Microsoft Foundry + MCP)
    MCP: icd10_codes   → validate I10 (billable), R07.9 (billable — non-specific)
    MCP: cms_coverage  → Aetna Clinical Policy Bulletin 0021 (Cardiac Cath)
    MCP: npi_registry  → verify NPI 1417996257 → Cardiovascular Disease specialty confirmed
@@ -210,7 +210,7 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
    ❌ Medical management (nitrates, beta-blockers) NOT documented as trialed
    → completeness_score: 0.20, missing: ["positive_stress_test", "ACS_documentation", "medical_management_trial"]
 
-3. Policy Matching  (Claude · APIM + MCP)
+3. Policy Matching  (Claude · Microsoft Foundry + MCP)
    → policy_match_score: 0.18, approval_probability: 18%
    → criteria_not_met: ["positive_stress_test_required", "ACS_symptoms_absent", "medical_management_untrialed"]
 
@@ -269,7 +269,7 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
    → step_therapy_required: true
    → "Cigna requires 2 DMARD failures before approving biologics"
 
-2. Doc Completeness  (Claude · APIM + MCP)
+2. Doc Completeness  (Claude · Microsoft Foundry + MCP)
    MCP: icd10_codes   → validate M06.00 (RA unspecified — billable)
    MCP: cms_coverage  → Cigna Coverage Policy 0522 (Biologic DMARDs)
    MCP: npi_registry  → verify NPI 1750887592 → Rheumatology specialty confirmed
@@ -279,7 +279,7 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
    ❌ MISSING: 2nd DMARD trial (leflunomide or hydroxychloroquine)
    → completeness_score: 0.68, missing: ["second_DMARD_trial"]
 
-3. Policy Matching  (Claude · APIM)
+3. Policy Matching  (Claude · Microsoft Foundry)
    → step_therapy_policy: ["MTX ≥ 3mo", "2nd DMARD ≥ 3mo", "both must fail → biologic approved"]
    → policy_match_score: 0.62, approval_probability: 55%
    → step_therapy_status: "ONE_OF_TWO_REQUIRED_DMARD_FAILURES_DOCUMENTED"
@@ -332,7 +332,7 @@ See [glossary.md](glossary.md) for definitions of clinical terms (CPT, ICD-10, L
 ### Appeal Agent Execution Trace
 
 ```
-Appeal Strategy  (Claude · APIM + MCP)
+Appeal Strategy  (Claude · Microsoft Foundry + MCP)
   MCP: icd10_codes   → validate M51.16, M47.816; confirm coding specificity
   MCP: cms_coverage  → LCD L36521 (Lumbar Spinal Fusion) — appeal criteria
   MCP: npi_registry  → verify rendering surgeon NPI 1861701351 → Neurological Surgery confirmed
@@ -439,7 +439,7 @@ Coverage Prediction  (GPT-4o · Foundry)
 [Coverage Prediction — SKIPPED: PA requirement established in UC1 submission]
 [Policy Matching    — SKIPPED: policy_match_score 0.78 already on record]
 
-1. Doc Completeness  (Claude · APIM + MCP)
+1. Doc Completeness  (Claude · Microsoft Foundry + MCP)
    MCP: icd10_codes   → re-validate M17.11 (unchanged)
    MCP: cms_coverage  → LCD L35506 — re-evaluate with new documents
    MCP: npi_registry  → verify NPI 1972123891 → Orthopaedic Surgery confirmed

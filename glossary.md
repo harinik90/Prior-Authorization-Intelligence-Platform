@@ -77,7 +77,7 @@ A structured FHIR resource representing a PA or billing claim, containing proced
 **MAF (Microsoft Agent Framework)**
 The orchestration framework used to build and run the multi-agent pipeline. Provides `WorkflowBuilder`, `ChatAgent`, and event-driven agent coordination.
 
-**Azure AI Foundry**
+**Microsoft Foundry**
 Microsoft's hosted AI agent service. Coverage Prediction and Submission agents run as persistent hosted agents using the threads + runs model via `AzureAIAgentClient`.
 
 **APIM (Azure API Management)**
@@ -90,7 +90,7 @@ An open protocol that allows AI agents to call external tools and data sources a
 A MAF tool wrapper that connects to a remote MCP server over HTTP. Loaded from the Claude Code plugin registry at agent initialization.
 
 **AzureAIAgentClient**
-The MAF client for Azure AI Foundry's hosted agent service. Uses the threads + runs model; agents persist on Foundry between calls (`should_cleanup_agent=False`).
+The MAF client for Microsoft Foundry's hosted agent service. Uses the threads + runs model; agents persist on Microsoft Foundry between calls (`should_cleanup_agent=False`).
 
 **AnthropicClient**
 The MAF client for Claude models. Routed through Azure APIM via `AsyncAnthropic` with a custom `base_url`.

@@ -10,8 +10,6 @@ import os
 import pathlib
 import pytest
 
-pytestmark = pytest.mark.asyncio
-
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 BUNDLES_DIR = pathlib.Path(__file__).parent.parent.parent / "bundles"
@@ -26,6 +24,7 @@ def _check_env() -> None:
 
 # ── UC1: Total Knee Replacement — expect PENDING (missing BMI) ───────────────
 
+@pytest.mark.asyncio
 async def test_tka_pipeline_pend_missing_bmi():
     """UC1: TKA with complete docs except BMI — pipeline should return PENDING."""
     _check_env()
@@ -56,6 +55,7 @@ async def test_tka_pipeline_pend_missing_bmi():
 
 # ── UC2: CT-Guided Lung Biopsy — expect APPROVED ────────────────────────────
 
+@pytest.mark.asyncio
 async def test_lung_biopsy_full_docs_approve():
     """UC2: Lung biopsy with complete documentation — expect APPROVED."""
     _check_env()
@@ -87,6 +87,7 @@ async def test_lung_biopsy_full_docs_approve():
 
 # ── UC3: Cardiac Catheterization — expect DENIED (negative stress test) ──────
 
+@pytest.mark.asyncio
 async def test_cardiac_cath_deny():
     """UC3: Cardiac cath with negative stress test and no ACS — pipeline should DENY."""
     _check_env()
@@ -118,6 +119,7 @@ async def test_cardiac_cath_deny():
 
 # ── UC4: Biologic Drug / Step Therapy — expect PENDED ────────────────────────
 
+@pytest.mark.asyncio
 async def test_biologic_step_therapy_pend():
     """UC4: Biologic (adalimumab) with incomplete step therapy — pipeline should PEND."""
     _check_env()
@@ -149,6 +151,7 @@ async def test_biologic_step_therapy_pend():
 
 # ── UC5: Spinal Fusion Denial Appeal — expect P2P recommendation ─────────────
 
+@pytest.mark.asyncio
 async def test_spinal_fusion_appeal_co50():
     """UC5: CO-50 denial for spinal fusion — Appeal agent should recommend P2P."""
     _check_env()
@@ -184,6 +187,7 @@ async def test_spinal_fusion_appeal_co50():
 
 # ── UC6: Coverage Prediction — Emergency Visit, no PA required ───────────────
 
+@pytest.mark.asyncio
 async def test_coverage_prediction_emergency_no_pa():
     """UC6 variant: ER visit (CPT 99285) — Coverage Prediction should return PA not required."""
     _check_env()

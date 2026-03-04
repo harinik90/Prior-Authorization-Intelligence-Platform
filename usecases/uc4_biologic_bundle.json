@@ -2,6 +2,15 @@
   "resourceType": "Bundle",
   "id": "uc4-biologic-pa-bundle",
   "type": "collection",
+  "_pa_meta": {
+    "label": "UC4 — Biologic Drug / Step Therapy (CIGNA-COMM · PEND)",
+    "type": "pipeline",
+    "expected": "🟡 PEND — Step therapy incomplete, 2nd DMARD trial missing",
+    "sort_order": 4,
+    "npi": "1750887592",
+    "subscriber_id": "CIGNA-RA-10923",
+    "clinical_summary": "Rheumatoid arthritis, seropositive (RF positive). Methotrexate trial ≥ 3 months at 15mg/week — documented inadequate response. Second conventional DMARD trial (leflunomide or hydroxychloroquine) NOT documented. Rheumatologist NPI 1750887592 (Dr. Haneen Abdalhadi, Rheumatology, IL — active). Requesting adalimumab as first biologic without completing required step therapy."
+  },
   "entry": [
     {
       "resource": {

@@ -1,0 +1,125 @@
+{
+  "resourceType": "Bundle",
+  "id": "uc7-tka-resubmission-bundle",
+  "type": "collection",
+  "_comment": "Resubmission of UC1 TKA after PEND — all previously missing documentation now resolved",
+  "_pa_meta": {
+    "label": "UC7 — TKA Resubmission after PEND (BCBS-IL PPO · APPROVE)",
+    "type": "resubmission",
+    "expected": "🟢 APPROVE — All documentation gaps resolved",
+    "sort_order": 7,
+    "npi": "1972123891",
+    "clinical_summary": "Resubmission after PEND (BCBS-2024-TKA-88241). All previously missing items now resolved. Diagnosis: ICD-10 M17.11 — primary osteoarthritis, right knee, confirmed. Conservative treatment: physical therapy x12 weeks documented with formal discharge summary; NSAIDs trialed (naproxen 500mg BID x8 weeks) — documented inadequate response; intra-articular corticosteroid injection x2 — failed. Radiographic evidence: weight-bearing AP X-ray shows Kellgren-Lawrence Grade 3 medial compartment narrowing with subchondral sclerosis — read by radiologist 2024-11-15. Functional impairment: KOOS score 42/100 — significant impairment; patient reports inability to climb stairs, disrupted sleep, and ADL limitations due to pain. BMI 34.2 kg/m² documented (within BCBS-IL threshold of <40). Ordering provider NPI 1972123891 verified active — Dr. Hussein Abdulrassoul, Orthopaedic Surgery, IL."
+  },
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PT-78432",
+        "identifier": [{ "system": "urn:pa-system:patient-token", "value": "PT-78432" }],
+        "gender": "male",
+        "birthDate": "1960-03-14",
+        "address": [{ "state": "IL" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-bcbs-78432-resub",
+        "status": "active",
+        "subscriber": { "reference": "Patient/PT-78432" },
+        "beneficiary": { "reference": "Patient/PT-78432" },
+        "payor": [{ "display": "BCBS-IL", "identifier": { "value": "BCBS-IL" } }],
+        "class": [
+          { "type": { "coding": [{ "code": "plan" }] }, "value": "PPO", "name": "BlueCross BlueShield PPO" }
+        ],
+        "subscriberId": "BCB123456789"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "sr-tka-78432-resub",
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "27447",
+              "display": "Arthroplasty, knee, condyle and plateau; medial AND lateral compartments with or without patella resurfacing (total knee arthroplasty)"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-78432" },
+        "requester": { "reference": "Practitioner/NPI-1972123891" },
+        "insurance": [{ "reference": "Coverage/cov-bcbs-78432-resub" }],
+        "reasonReference": [{ "reference": "Condition/cond-oa-right-knee-resub" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-oa-right-knee-resub",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "M17.11",
+              "display": "Primary osteoarthritis, right knee"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/PT-78432" },
+        "note": [
+          {
+            "text": "Resubmission after PEND (BCBS-2024-TKA-88241). Physical therapy x12 weeks with formal discharge summary. NSAIDs naproxen 500mg BID x8 weeks — inadequate response documented. Corticosteroid injection x2 — failed. Weight-bearing AP X-ray: KL Grade 3 medial compartment narrowing, subchondral sclerosis (2024-11-15). KOOS 42/100, ADL limitations. BMI 34.2 kg/m². NPI 1972123891 verified — Dr. Hussein Abdulrassoul, Orthopaedic Surgery, IL."
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "NPI-1972123891",
+        "identifier": [
+          { "system": "http://hl7.org/fhir/sid/us-npi", "value": "1972123891" }
+        ],
+        "name": [{ "family": "Abdulrassoul", "given": ["Hussein"], "prefix": ["Dr."] }],
+        "qualification": [
+          {
+            "code": {
+              "coding": [{ "system": "http://nucc.org/provider-taxonomy", "code": "207X00000X", "display": "Orthopaedic Surgery" }]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-bmi-78432",
+        "status": "final",
+        "code": { "coding": [{ "code": "39156-5", "system": "http://loinc.org", "display": "Body mass index (BMI)" }] },
+        "subject": { "reference": "Patient/PT-78432" },
+        "effectiveDateTime": "2024-11-10",
+        "valueQuantity": { "value": 34.2, "unit": "kg/m2" },
+        "note": [{ "text": "BMI 34.2 kg/m² — within BCBS-IL threshold of <40" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-koos-78432",
+        "status": "final",
+        "code": { "coding": [{ "code": "KOOS", "system": "urn:ortho:scores", "display": "Knee injury and Osteoarthritis Outcome Score" }] },
+        "subject": { "reference": "Patient/PT-78432" },
+        "effectiveDateTime": "2024-11-10",
+        "valueQuantity": { "value": 42, "unit": "score" },
+        "note": [{ "text": "KOOS 42/100 — significant functional impairment. Patient unable to climb stairs, disrupted sleep, ADL limitations." }]
+      }
+    }
+  ]
+}

@@ -3,6 +3,22 @@
   "id": "uc5-spinal-fusion-appeal-bundle",
   "type": "collection",
   "_comment": "This bundle represents a DENIAL scenario — includes original Claim and ClaimResponse (denial) for the Appeal Strategy agent",
+  "_pa_meta": {
+    "label": "UC5 — Spinal Fusion Appeal (HUMANA-MA · CO-50 → P2P)",
+    "type": "appeal",
+    "expected": "🔵 P2P Recommendation — CO-50 clinical disagreement",
+    "sort_order": 5,
+    "npi": "1861701351",
+    "subscriber_id": "HUMANA-SPINE-77102",
+    "pa_request_id": "HUMANA-2024-SPINE-77102",
+    "cpt": "22612",
+    "cpt_desc": "Posterior Lumbar Fusion L4-L5",
+    "icd10": "M51.16, M47.816",
+    "icd10_desc": "Disc degeneration lumbar; Spondylosis with radiculopathy",
+    "denial_code": "CO-50",
+    "denial_rationale": "Conservative treatment not exhausted — only 4 months documented, 6 months required per LCD L36521.",
+    "clinical_summary": "MRI shows severe L4-L5 foraminal stenosis. EMG confirms L5 radiculopathy. Failed 2 epidural steroid injections. PT x4 months documented. ODI score 62/100."
+  },
   "entry": [
     {
       "resource": {

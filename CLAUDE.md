@@ -28,13 +28,13 @@ AI-driven Prior Authorization (PA) automation for healthcare providers. Five spe
 
 1. **One agent per stage** — each agent has a single, focused responsibility. No monolithic multi-agent graphs.
 
-2. **GPT-4o on Foundry, Claude via APIM** — do not swap clients. `AzureAIAgentClient` for Coverage Prediction and Submission; `AnthropicClient` for Doc Completeness, Policy Matching, Appeal Strategy.
+2. **GPT-4o on Microsoft Foundry, Claude on Microsoft Foundry** — do not swap clients. `AzureAIAgentClient` for Coverage Prediction and Submission; `AnthropicClient` for Doc Completeness, Policy Matching, Appeal Strategy.
 
 3. **Agents persist on Foundry** — always set `should_cleanup_agent=False`. Never create and delete per-run.
 
 4. **Context accumulates forward** — each agent's output is prepended to the next agent's prompt. Downstream agents see the full reasoning history of prior stages.
 
-5. **MCP for real-time data** — ICD-10 validation, NPI verification, CMS coverage, and clinical literature must use MCP servers, not model general knowledge.
+5. **MCP for real-time data** — Doc Completeness and Appeal Strategy use HostedMCPTool-only (no Python function tools). Mixing HostedMCPTool + Python function tools triggers a tool_result placement bug in agent_framework_anthropic 1.0.0b260107.
 
 6. **Single event loop** — `AzureAIAgentClient` uses aiohttp bound to the creating loop. One `@st.cache_resource` loop shared across all Streamlit stages. In pytest, `asyncio_default_test_loop_scope = session`.
 
@@ -48,38 +48,11 @@ AI-driven Prior Authorization (PA) automation for healthcare providers. Five spe
 
 | Agent | File | Model | Key Tools |
 |---|---|---|---|
-| Coverage Prediction | `agents/coverage_prediction/agent.py` | GPT-4o (Foundry hosted) | `check_pa_requirement` |
-| Doc Completeness | `agents/doc_completeness/agent.py` | Claude via APIM | `check_payer_criteria`, `get_fhir_documents` + MCP |
-| Policy Matching | `agents/policy_matching/agent.py` | Claude via APIM | `get_payer_policy`, `score_clinical_evidence` |
-| Submission | `agents/submission/agent.py` | GPT-4o (Foundry hosted) | `build_fhir_claim`, `submit_pa_to_payer`, `poll_pa_status` |
-| Appeal Strategy | `agents/appeal_strategy/agent.py` | Claude via APIM | `lookup_denial_reason` + MCP |
-
----
-
-## Critical Patterns
-
-### GPT-4o agents — sys.modules stub (MUST be first)
-`agent_framework_azure_ai._client` imports classes missing in `azure-ai-projects 2.0.0b4`. Pre-stub before any import:
-```python
-import sys as _sys, types as _types
-if "agent_framework_azure_ai._client" not in _sys.modules:
-    _stub = _types.ModuleType("agent_framework_azure_ai._client")
-    _stub.AzureAIClient = type("AzureAIClient", (), {})
-    _sys.modules["agent_framework_azure_ai._client"] = _stub
-from agent_framework_azure_ai._chat_client import AzureAIAgentClient
-```
-
-### Foundry agents — always reuse, never delete
-```python
-agent_id=_lookup_agent_id(endpoint, _AGENT_NAME),  # reuse if exists on Foundry
-should_cleanup_agent=False,                          # never delete
-```
-
-### APIM auth — both headers required
-```python
-default_headers={"api-key": key, "Ocp-Apim-Subscription-Key": key}
-```
-Using only `api_key=` is insufficient. APIM is for Claude only — Foundry agents use `AZURE_AI_PROJECT_ENDPOINT` directly.
+| Coverage Prediction | `agents/coverage_prediction/agent.py` | GPT-4o (Microsoft Foundry) | `check_pa_requirement` |
+| Doc Completeness | `agents/doc_completeness/agent.py` | Claude (Microsoft Foundry) | MCP only: `icd10_codes`, `cms_coverage`, `npi_registry` |
+| Policy Matching | `agents/policy_matching/agent.py` | Claude (Microsoft Foundry) | `get_payer_policy`, `score_clinical_evidence` |
+| Submission | `agents/submission/agent.py` | GPT-4o (Microsoft Foundry) | `build_fhir_claim`, `submit_pa_to_payer`, `poll_pa_status` |
+| Appeal Strategy | `agents/appeal_strategy/agent.py` | Claude (Microsoft Foundry) | MCP only: `icd10_codes`, `cms_coverage`, `npi_registry`, `pubmed` |
 
 ---
 
@@ -128,3 +101,30 @@ shared/tools/payer_api.py       submit_pa_to_payer(), poll_pa_status()
 | `cms_coverage` | LCD/NCD Medicare policy lookup |
 | `npi_registry` | Provider NPI verification |
 | `pubmed` | Clinical literature for appeal evidence |
+
+---
+
+## Critical Patterns
+
+### GPT-4o agents — sys.modules stub (MUST be first)
+`agent_framework_azure_ai._client` imports classes missing in `azure-ai-projects 2.0.0b4`. Pre-stub before any import:
+```python
+import sys as _sys, types as _types
+if "agent_framework_azure_ai._client" not in _sys.modules:
+    _stub = _types.ModuleType("agent_framework_azure_ai._client")
+    _stub.AzureAIClient = type("AzureAIClient", (), {})
+    _sys.modules["agent_framework_azure_ai._client"] = _stub
+from agent_framework_azure_ai._chat_client import AzureAIAgentClient
+```
+
+### Foundry agents — always reuse, never delete
+```python
+agent_id=_lookup_agent_id(endpoint, _AGENT_NAME),  # reuse if exists on Foundry
+should_cleanup_agent=False,                          # never delete
+```
+
+### APIM auth — both headers required
+```python
+default_headers={"api-key": key, "Ocp-Apim-Subscription-Key": key}
+```
+Using only `api_key=` is insufficient. APIM is for Claude only — Foundry agents use `AZURE_AI_PROJECT_ENDPOINT` directly.

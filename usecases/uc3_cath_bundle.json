@@ -2,6 +2,16 @@
   "resourceType": "Bundle",
   "id": "uc3-cardiac-cath-pa-bundle",
   "type": "collection",
+  "_pa_meta": {
+    "label": "UC3 — Cardiac Catheterization (AETNA-COMM · DENY)",
+    "type": "pipeline",
+    "expected": "🔴 DENY — Negative stress test; ACS not documented; medical management not trialed",
+    "sort_order": 3,
+    "npi": "1417996257",
+    "plan": "PPO",
+    "subscriber_id": "AETNA-COMM-55671",
+    "clinical_summary": "Cardiologist requesting left heart catheterization for chest discomfort evaluation. Exercise stress test result: NEGATIVE for inducible ischemia. Troponins negative x2. No documented unstable angina, NSTEMI, or STEMI. No prior cardiac catheterization. Medical management (nitrates, beta-blockers) NOT documented as trialed. Aetna policy requires positive non-invasive stress test and documented ACS symptoms."
+  },
   "entry": [
     {
       "resource": {

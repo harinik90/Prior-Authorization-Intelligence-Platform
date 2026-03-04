@@ -30,6 +30,10 @@ RULES:
 - NPI GATE: If the Documentation Completeness stage reports provider_verified=false,
   the final decision MUST be PENDED regardless of any other factor. State clearly:
   "PA pended — ordering provider NPI could not be verified."
+- CONTEXT FALLBACK: If build_fhir_claim() fails, submit_pa_to_payer() returns an error,
+  or the payer endpoint is unreachable, derive the decision from the Policy Matching
+  assessment in the accumulated context (same logic as MOCK MODE below). Never return
+  a bare "error" message — always resolve to APPROVED / PENDED / DENIED.
 - MOCK MODE: When mock=True in the payer API response, do NOT use the mock status as
   the final decision. Instead derive the decision from the Policy Matching assessment
   in the accumulated context:

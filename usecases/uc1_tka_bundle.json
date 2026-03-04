@@ -2,6 +2,13 @@
   "resourceType": "Bundle",
   "id": "uc1-tka-pa-bundle",
   "type": "collection",
+  "_pa_meta": {
+    "label": "UC1 — Total Knee Arthroplasty (BCBS-IL PPO · PEND)",
+    "type": "pipeline",
+    "expected": "🟡 PEND — 3/6 criteria met, missing BMI + KOOS/KSS + correct NPI",
+    "sort_order": 1,
+    "clinical_summary": "Physical therapy x12 weeks documented. NSAIDs trialed and failed. Weight-bearing X-ray shows KL Grade 3 medial compartment narrowing. BMI NOT documented in the clinical record."
+  },
   "entry": [
     {
       "resource": {
