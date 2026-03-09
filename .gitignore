@@ -42,3 +42,17 @@ outputs/
 # OS
 .DS_Store
 Thumbs.db
+
+# docs/screenshots — ignore everything except PNGs and the final voiceover
+docs/screenshots/audio/
+docs/screenshots/*.mp3
+docs/screenshots/*.mp4
+docs/screenshots/*.ps1
+docs/screenshots/*.workspace
+docs/screenshots/narration.txt
+docs/screenshots/check_audio.py
+docs/screenshots/generate_voiceover.py
+docs/screenshots/combine_video.py
+# Re-include the final output video and all PNG images
+!docs/screenshots/PA_Platform_Voiceover.mp4
+!docs/screenshots/*.png
