@@ -107,18 +107,6 @@ python -m pytest tests/integration/test_pa_pipeline.py -v
 
 ---
 
-## Implemented Use Cases
-
-| UC | Scenario | Payer | CPT | Workflow | Expected Decision |
-|---|---|---|---|---|---|
-| UC1 | Total Knee Arthroplasty | BCBS-IL PPO | 27447 | Full 4-stage pipeline | 🟡 PEND — missing BMI + KOOS/KSS |
-| UC2 | CT-Guided Lung Biopsy | UHC Medicare Advantage | 32408 | Full 4-stage pipeline | 🟢 APPROVE — complete Fleischner docs |
-| UC3 | Biologic / Step Therapy | Cigna PPO | J0129 (HCPCS) | Full 4-stage pipeline | 🟡 PEND — 2nd DMARD trial missing |
-| UC5 | Spinal Fusion Denial Appeal | Humana MA | 22612 | Appeal agent only | 🔵 P2P recommendation (CO-50) |
-| UC6 | Emergency ED Visit | Aetna HMO | 99285 | Coverage check only | ⚪ PA not required — emergency exempt |
-| UC7 | TKA Resubmission after PEND | BCBS-IL PPO | 27447 | Doc + Submission only | 🟢 APPROVE — all gaps resolved |
-| UC8 | Colonoscopy, Unknown Payer | Regional HMO | 45378 | Coverage check only | ❓ Unknown — manual verification |
-
 See [usecases.md](usecases.md) for full clinical scenarios and expected agent execution traces for every use case.
 See [CLAUDE.md](CLAUDE.md) for AI coding instructions, design principles, and critical implementation patterns.
 See [glossary.md](glossary.md) for definitions of clinical, FHIR, and AI terms used throughout.
